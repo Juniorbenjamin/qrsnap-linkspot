@@ -80,10 +80,14 @@ function PublicProfile() {
         ) : (
           <>
             <div
-              className="mb-5 flex h-24 w-24 items-center justify-center rounded-full text-4xl shadow-elevated"
-              style={{ background: t.card, backdropFilter: "blur(10px)" }}
+              className="mb-5 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full text-4xl shadow-elevated"
+              style={{ background: profile.logo_url ? "transparent" : t.card, backdropFilter: profile.logo_url ? "none" : "blur(10px)" }}
             >
-              {profile.avatar_emoji}
+              {profile.logo_url ? (
+                <img src={profile.logo_url} alt={`${profile.display_name} logo`} className="h-full w-full object-cover" />
+              ) : (
+                profile.avatar_emoji
+              )}
             </div>
             <h1 className={`text-2xl ${fontWeight === "normal" ? "font-semibold" : "font-bold"}`}>{profile.display_name}</h1>
             {profile.bio && (

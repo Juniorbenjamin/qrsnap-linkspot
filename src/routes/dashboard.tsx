@@ -11,8 +11,9 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { createCustomerPortalSession } from "@/server/payments.functions";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { publicProfileUrl } from "@/lib/public-url";
-import { Plus, ExternalLink, Trash2, Eye, MousePointerClick, Crown, Pencil, QrCode, CreditCard, Loader2 } from "lucide-react";
+import { Plus, ExternalLink, Trash2, Eye, MousePointerClick, Crown, Pencil, QrCode, CreditCard, Loader2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -157,6 +158,14 @@ function Dashboard() {
                   <Label htmlFor="emoji">Avatar emoji</Label>
                   <Input id="emoji" defaultValue={profile.avatar_emoji} maxLength={2} onBlur={(e) => update({ avatar_emoji: e.target.value || "✨" }).catch(() => {})} />
                 </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label>Logo (shown on your link page & QR)</Label>
+                  <LogoUploader
+                    userId={profile.id}
+                    currentUrl={profile.logo_url}
+                    onChange={(url) => update({ logo_url: url }).catch(() => toast.error("Save failed"))}
+                  />
+                </div>
               </div>
             </section>
 
@@ -294,6 +303,7 @@ function Dashboard() {
                 fgColor={profile.is_pro ? profile.qr_color : "#1a1a2e"}
                 bgColor={profile.is_pro ? profile.qr_bg : "#ffffff"}
                 logoText={profile.is_pro ? profile.logo_text : ""}
+                logoUrl={profile.is_pro ? profile.logo_url : ""}
               />
               <p className="mt-4 break-all text-center text-xs text-muted-foreground">{publicUrl}</p>
               <Button asChild variant="outline" className="mt-4 w-full">
@@ -344,6 +354,107 @@ function ColorField({ label, value, onSave }: { label: string; value: string; on
             Reset
           </Button>
         )}
+      </div>
+    </div>
+  );
+}
+
+function LogoUploader({ userId, currentUrl, onChange }: { userId: string; currentUrl: string; onChange: (url: string) => void }) {
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Logo must be under 2MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `${userId}/logo.${ext}`;
+
+      // Remove any previous logo files (different extensions)
+      await supabase.storage.from("profile-logos").remove([
+        `${userId}/logo.png`,
+        `${userId}/logo.jpg`,
+        `${userId}/logo.jpeg`,
+        `${userId}/logo.webp`,
+        `${userId}/logo.svg`,
+        `${userId}/logo.gif`,
+      ]);
+
+      const { error } = await supabase.storage
+        .from("profile-logos")
+        .upload(path, file, { upsert: true, contentType: file.type });
+      if (error) throw error;
+
+      const { data } = supabase.storage.from("profile-logos").getPublicUrl(path);
+      // Cache-bust so the new logo shows immediately
+      onChange(`${data.publicUrl}?v=${Date.now()}`);
+      toast.success("Logo uploaded");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    setUploading(true);
+    try {
+      await supabase.storage.from("profile-logos").remove([
+        `${userId}/logo.png`,
+        `${userId}/logo.jpg`,
+        `${userId}/logo.jpeg`,
+        `${userId}/logo.webp`,
+        `${userId}/logo.svg`,
+        `${userId}/logo.gif`,
+      ]);
+      onChange("");
+      toast.success("Logo removed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-4">
+      <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted">
+        {currentUrl ? (
+          <img src={currentUrl} alt="Logo preview" className="h-full w-full object-contain" />
+        ) : (
+          <span className="text-xs text-muted-foreground">No logo</span>
+        )}
+      </div>
+      <div className="flex flex-col gap-2">
+        <label>
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            className="sr-only"
+            disabled={uploading}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFile(f);
+              e.target.value = "";
+            }}
+          />
+          <Button type="button" variant="outline" size="sm" disabled={uploading} asChild>
+            <span className="cursor-pointer">
+              {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+              {currentUrl ? "Replace" : "Upload"}
+            </span>
+          </Button>
+        </label>
+        {currentUrl && (
+          <Button type="button" variant="ghost" size="sm" disabled={uploading} onClick={handleRemove}>
+            <X className="mr-2 h-4 w-4" /> Remove
+          </Button>
+        )}
+        <p className="text-xs text-muted-foreground">PNG, JPG, WebP or SVG · max 2MB</p>
       </div>
     </div>
   );

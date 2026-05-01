@@ -34,6 +34,7 @@ export type Profile = {
   button_text_color: string;
   button_style: ButtonStyle;
   font_weight: FontWeight;
+  logo_url: string;
 };
 
 export type AnalyticsEvent = {

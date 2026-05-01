@@ -63,6 +63,7 @@ export type Database = {
           id: string
           is_pro: boolean
           logo_text: string
+          logo_url: string
           qr_bg: string
           qr_color: string
           theme: string
@@ -82,6 +83,7 @@ export type Database = {
           id: string
           is_pro?: boolean
           logo_text?: string
+          logo_url?: string
           qr_bg?: string
           qr_color?: string
           theme?: string
@@ -101,6 +103,7 @@ export type Database = {
           id?: string
           is_pro?: boolean
           logo_text?: string
+          logo_url?: string
           qr_bg?: string
           qr_color?: string
           theme?: string
