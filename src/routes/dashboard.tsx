@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { QRPreview } from "@/components/QRPreview";
-import { useAuth, useMyProfile, useMyLinks, useMyAnalytics, FREE_LINK_LIMIT } from "@/lib/store";
+import { useAuth, useMyProfile, useMyLinks, useMyAnalytics, FREE_LINK_LIMIT, themes, type Theme, type ButtonStyle, type FontWeight } from "@/lib/store";
 import { useSubscription } from "@/hooks/useSubscription";
 import { createCustomerPortalSession } from "@/server/payments.functions";
 import { getPaddleEnvironment } from "@/lib/paddle";
