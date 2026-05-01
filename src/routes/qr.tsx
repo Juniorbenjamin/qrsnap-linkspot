@@ -1,12 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { QRPreview } from "@/components/QRPreview";
-import { useProfile, themes, type Theme } from "@/lib/store";
+import { useAuth, useMyProfile, themes, type Theme } from "@/lib/store";
 import { publicProfileUrl } from "@/lib/public-url";
 import { Crown, Lock } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/qr")({
   component: QRPage,
@@ -14,12 +16,27 @@ export const Route = createFileRoute("/qr")({
 });
 
 function QRPage() {
-  const { profile, update } = useProfile();
-  // QR codes are printed on flyers, signs, business cards — they need a stable
-  // public URL that survives renames and points at the published deployment.
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const { profile, loading: profileLoading, update } = useMyProfile();
+
+  useEffect(() => {
+    if (!authLoading && !user) navigate({ to: "/login" });
+  }, [authLoading, user, navigate]);
+
+  if (authLoading || profileLoading || !profile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SiteHeader />
+        <div className="mx-auto max-w-6xl px-4 py-16 text-center text-muted-foreground sm:px-6">Loading…</div>
+      </div>
+    );
+  }
+
   const publicUrl = publicProfileUrl(profile.username);
   const qrTarget = `${publicUrl}?src=qr`;
-  const isPro = profile.isPro;
+  const isPro = profile.is_pro;
+  const save = (patch: Partial<typeof profile>) => update(patch).catch(() => toast.error("Save failed"));
 
   return (
     <div className="min-h-screen bg-background">
@@ -31,14 +48,13 @@ function QRPage() {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-2">
-          {/* Preview */}
           <div className="rounded-2xl border border-border bg-gradient-card p-8 shadow-soft">
             <div className="flex justify-center">
               <QRPreview
                 value={qrTarget}
-                fgColor={isPro ? profile.qrColor : "#1a1a2e"}
-                bgColor={isPro ? profile.qrBg : "#ffffff"}
-                logoText={isPro ? profile.logoText : ""}
+                fgColor={isPro ? profile.qr_color : "#1a1a2e"}
+                bgColor={isPro ? profile.qr_bg : "#ffffff"}
+                logoText={isPro ? profile.logo_text : ""}
                 size={280}
               />
             </div>
@@ -47,7 +63,6 @@ function QRPage() {
             </p>
           </div>
 
-          {/* Controls */}
           <div className="space-y-6">
             <section className="rounded-2xl border border-border bg-card p-6 shadow-soft">
               <div className="mb-4 flex items-center justify-between">
@@ -63,39 +78,20 @@ function QRPage() {
                 <div className="space-y-2">
                   <Label>QR color</Label>
                   <div className="flex items-center gap-2">
-                    <input
-                      type="color"
-                      value={profile.qrColor}
-                      onChange={(e) => update({ qrColor: e.target.value })}
-                      disabled={!isPro}
-                      className="h-10 w-14 cursor-pointer rounded-md border border-border bg-background disabled:opacity-50"
-                    />
-                    <Input value={profile.qrColor} onChange={(e) => update({ qrColor: e.target.value })} disabled={!isPro} />
+                    <input type="color" value={profile.qr_color} onChange={(e) => save({ qr_color: e.target.value })} disabled={!isPro} className="h-10 w-14 cursor-pointer rounded-md border border-border bg-background disabled:opacity-50" />
+                    <Input value={profile.qr_color} onChange={(e) => save({ qr_color: e.target.value })} disabled={!isPro} />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label>Background</Label>
                   <div className="flex items-center gap-2">
-                    <input
-                      type="color"
-                      value={profile.qrBg}
-                      onChange={(e) => update({ qrBg: e.target.value })}
-                      disabled={!isPro}
-                      className="h-10 w-14 cursor-pointer rounded-md border border-border bg-background disabled:opacity-50"
-                    />
-                    <Input value={profile.qrBg} onChange={(e) => update({ qrBg: e.target.value })} disabled={!isPro} />
+                    <input type="color" value={profile.qr_bg} onChange={(e) => save({ qr_bg: e.target.value })} disabled={!isPro} className="h-10 w-14 cursor-pointer rounded-md border border-border bg-background disabled:opacity-50" />
+                    <Input value={profile.qr_bg} onChange={(e) => save({ qr_bg: e.target.value })} disabled={!isPro} />
                   </div>
                 </div>
                 <div className="space-y-2 sm:col-span-2">
                   <Label htmlFor="logo">Logo text (center of QR)</Label>
-                  <Input
-                    id="logo"
-                    placeholder="e.g. MIKE"
-                    value={profile.logoText}
-                    onChange={(e) => update({ logoText: e.target.value })}
-                    disabled={!isPro}
-                    maxLength={4}
-                  />
+                  <Input id="logo" placeholder="e.g. MIKE" value={profile.logo_text} onChange={(e) => save({ logo_text: e.target.value })} disabled={!isPro} maxLength={4} />
                 </div>
               </div>
 
@@ -105,9 +101,7 @@ function QRPage() {
                     <Lock className="h-4 w-4 text-primary" />
                     <span>Unlock colors, logo & themes</span>
                   </div>
-                  <Button asChild variant="brand" size="sm">
-                    <Link to="/pricing">Upgrade</Link>
-                  </Button>
+                  <Button asChild variant="brand" size="sm"><Link to="/pricing">Upgrade</Link></Button>
                 </div>
               )}
             </section>
@@ -126,7 +120,7 @@ function QRPage() {
                       key={key}
                       type="button"
                       disabled={!isPro && key !== "midnight"}
-                      onClick={() => update({ theme: key })}
+                      onClick={() => save({ theme: key })}
                       className={`group relative flex h-20 flex-col items-center justify-end overflow-hidden rounded-xl border-2 p-2 text-xs font-medium transition-all disabled:opacity-50 ${
                         active ? "border-primary shadow-glow" : "border-border hover:border-primary/40"
                       }`}

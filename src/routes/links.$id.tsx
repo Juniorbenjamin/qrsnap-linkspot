@@ -1,11 +1,12 @@
 import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useProfile, FREE_LINK_LIMIT } from "@/lib/store";
+import { useAuth, useMyProfile, useMyLinks, FREE_LINK_LIMIT } from "@/lib/store";
 import { ArrowLeft, Save } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/links/$id")({
   component: EditLink,
@@ -13,30 +14,50 @@ export const Route = createFileRoute("/links/$id")({
 });
 
 function EditLink() {
+  const navigate = useNavigate();
   const { id } = useParams({ from: "/links/$id" });
   const isNew = id === "new";
-  const { profile, update } = useProfile();
-  const navigate = useNavigate();
 
-  const existing = profile.links.find((l) => l.id === id);
-  const [title, setTitle] = useState(existing?.title ?? "");
-  const [url, setUrl] = useState(existing?.url ?? "");
+  const { user, loading: authLoading } = useAuth();
+  const { profile, loading: profileLoading } = useMyProfile();
+  const { links, add, update } = useMyLinks(profile?.id);
+
+  const existing = links.find((l) => l.id === id);
+  const [title, setTitle] = useState("");
+  const [url, setUrl] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && !user) navigate({ to: "/login" });
+  }, [authLoading, user, navigate]);
 
   useEffect(() => {
     if (existing) { setTitle(existing.title); setUrl(existing.url); }
-  }, [existing]);
+  }, [existing?.id]);
 
-  const atLimit = !profile.isPro && isNew && profile.links.length >= FREE_LINK_LIMIT;
+  if (authLoading || profileLoading || !profile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SiteHeader />
+        <div className="mx-auto max-w-2xl px-4 py-16 text-center text-muted-foreground sm:px-6">Loading…</div>
+      </div>
+    );
+  }
 
-  const save = (e: React.FormEvent) => {
+  const atLimit = !profile.is_pro && isNew && links.length >= FREE_LINK_LIMIT;
+
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (atLimit) return;
-    if (isNew) {
-      update({ links: [...profile.links, { id: Date.now().toString(), title, url }] });
-    } else {
-      update({ links: profile.links.map((l) => (l.id === id ? { ...l, title, url } : l)) });
-    }
-    navigate({ to: "/dashboard" });
+    setSubmitting(true);
+    try {
+      if (isNew) await add(title, url);
+      else await update(id, { title, url });
+      toast.success(isNew ? "Link added" : "Link updated");
+      navigate({ to: "/dashboard" });
+    } catch {
+      toast.error("Save failed");
+    } finally { setSubmitting(false); }
   };
 
   return (
@@ -68,8 +89,8 @@ function EditLink() {
               <Input id="url" type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." required />
             </div>
             <div className="flex gap-2 pt-2">
-              <Button type="submit" variant="brand" size="lg" className="flex-1">
-                <Save className="mr-2 h-4 w-4" /> Save link
+              <Button type="submit" variant="brand" size="lg" className="flex-1" disabled={submitting}>
+                <Save className="mr-2 h-4 w-4" /> {submitting ? "Saving…" : "Save link"}
               </Button>
               <Button type="button" variant="outline" size="lg" onClick={() => navigate({ to: "/dashboard" })}>Cancel</Button>
             </div>

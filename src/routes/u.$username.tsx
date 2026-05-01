@@ -1,11 +1,10 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { useProfile, themes, trackEvent } from "@/lib/store";
+import { useEffect, useState } from "react";
+import { fetchPublicProfile, themes, trackEvent, type Profile, type LinkItem } from "@/lib/store";
 import { ExternalLink } from "lucide-react";
 
 export const Route = createFileRoute("/u/$username")({
   component: PublicProfile,
-  // Validate ?src=qr so we know whether this visit came from a QR scan
   validateSearch: (search: Record<string, unknown>) => ({
     src: search.src === "qr" ? ("qr" as const) : undefined,
   }),
@@ -15,70 +14,92 @@ export const Route = createFileRoute("/u/$username")({
 function PublicProfile() {
   const { username } = useParams({ from: "/u/$username" });
   const { src } = Route.useSearch();
-  const { profile } = useProfile();
-  const t = themes[profile.theme];
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [links, setLinks] = useState<LinkItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Always count a page view; additionally count a "scan" when arriving via QR.
-    trackEvent({ type: "view", source: src === "qr" ? "qr" : "direct" });
-    if (src === "qr") {
-      trackEvent({ type: "scan", source: "qr" });
-    }
-  }, [src]);
+    let alive = true;
+    fetchPublicProfile(username).then(({ profile: p, links: l }) => {
+      if (!alive) return;
+      setProfile(p);
+      setLinks(l);
+      setLoading(false);
+      // Record analytics now that we know the profile_id.
+      if (p) {
+        trackEvent({ profile_id: p.id, event_type: "view", source: src === "qr" ? "qr" : "direct" });
+        if (src === "qr") trackEvent({ profile_id: p.id, event_type: "scan", source: "qr" });
+      }
+    });
+    return () => { alive = false; };
+  }, [username, src]);
 
-  // In a real app we'd fetch by username — here we just show the local profile
-  const matches = profile.username === username;
+  const themeKey = (profile?.theme && profile.theme in themes ? profile.theme : "midnight") as keyof typeof themes;
+  const t = themes[themeKey];
 
-  // Reliably record a click *before* navigating away. We:
-  //  1. write the event synchronously to localStorage (survives navigation)
-  //  2. let the browser follow the href naturally (no preventDefault → respects
-  //     middle-click, cmd-click, "open in new tab", etc.)
-  const handleClick = (linkId: string) => {
-    trackEvent({ type: "click", linkId, source: src === "qr" ? "qr" : "direct" });
+  const handleClick = (link: LinkItem) => {
+    if (!profile) return;
+    // Synchronous-ish fire; supabase-js queues the request and the browser
+    // will keep it alive long enough on a same-origin POST. We do not await
+    // so navigation isn't delayed.
+    trackEvent({
+      profile_id: profile.id,
+      link_id: link.id,
+      event_type: "click",
+      source: src === "qr" ? "qr" : "direct",
+    });
   };
 
   return (
     <div className="min-h-screen w-full" style={{ background: t.bg, color: t.text }}>
       <div className="mx-auto flex min-h-screen max-w-md flex-col items-center px-5 py-12">
-        <div
-          className="mb-5 flex h-24 w-24 items-center justify-center rounded-full text-4xl shadow-elevated"
-          style={{ background: t.card, backdropFilter: "blur(10px)" }}
-        >
-          {profile.avatarEmoji}
-        </div>
-        <h1 className="text-2xl font-bold">{matches ? profile.displayName : `@${username}`}</h1>
-        {matches && profile.bio && (
-          <p className="mt-1 text-center text-sm" style={{ color: t.muted }}>{profile.bio}</p>
-        )}
-
-        <div className="mt-8 flex w-full flex-col gap-3">
-          {(matches ? profile.links : []).map((link) => (
-            <a
-              key={link.id}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => handleClick(link.id)}
-              onAuxClick={() => handleClick(link.id)}
-              className="group flex items-center justify-between rounded-2xl px-5 py-4 text-base font-semibold transition-all hover:-translate-y-0.5 hover:shadow-elevated"
-              style={{ background: t.card, color: t.text, backdropFilter: "blur(10px)" }}
-            >
-              <span>{link.title}</span>
-              <ExternalLink className="h-4 w-4 opacity-60 transition-opacity group-hover:opacity-100" />
-            </a>
-          ))}
-          {matches && profile.links.length === 0 && (
-            <p className="text-center text-sm" style={{ color: t.muted }}>No links yet.</p>
-          )}
-          {!matches && (
-            <p className="text-center text-sm" style={{ color: t.muted }}>This profile does not exist yet.</p>
-          )}
-        </div>
-
-        {!profile.isPro && (
-          <div className="mt-auto pt-12 text-xs opacity-70">
-            <a href="/" style={{ color: t.muted }}>Powered by ✨ QRLinkSpot</a>
+        {loading ? (
+          <p style={{ color: t.muted }}>Loading…</p>
+        ) : !profile ? (
+          <div className="text-center">
+            <p className="text-lg font-semibold">@{username}</p>
+            <p className="mt-2 text-sm" style={{ color: t.muted }}>This profile does not exist yet.</p>
           </div>
+        ) : (
+          <>
+            <div
+              className="mb-5 flex h-24 w-24 items-center justify-center rounded-full text-4xl shadow-elevated"
+              style={{ background: t.card, backdropFilter: "blur(10px)" }}
+            >
+              {profile.avatar_emoji}
+            </div>
+            <h1 className="text-2xl font-bold">{profile.display_name}</h1>
+            {profile.bio && (
+              <p className="mt-1 text-center text-sm" style={{ color: t.muted }}>{profile.bio}</p>
+            )}
+
+            <div className="mt-8 flex w-full flex-col gap-3">
+              {links.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => handleClick(link)}
+                  onAuxClick={() => handleClick(link)}
+                  className="group flex items-center justify-between rounded-2xl px-5 py-4 text-base font-semibold transition-all hover:-translate-y-0.5 hover:shadow-elevated"
+                  style={{ background: t.card, color: t.text, backdropFilter: "blur(10px)" }}
+                >
+                  <span>{link.title}</span>
+                  <ExternalLink className="h-4 w-4 opacity-60 transition-opacity group-hover:opacity-100" />
+                </a>
+              ))}
+              {links.length === 0 && (
+                <p className="text-center text-sm" style={{ color: t.muted }}>No links yet.</p>
+              )}
+            </div>
+
+            {!profile.is_pro && (
+              <div className="mt-auto pt-12 text-xs opacity-70">
+                <a href="/" style={{ color: t.muted }}>Powered by ✨ QRLinkSpot</a>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

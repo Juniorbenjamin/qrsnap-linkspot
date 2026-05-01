@@ -1,9 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
-import { useAnalytics, useProfile } from "@/lib/store";
+import { useAuth, useMyAnalytics, useMyProfile } from "@/lib/store";
 import { Eye, MousePointerClick, TrendingUp, Crown, Lock, QrCode } from "lucide-react";
-import { useMemo } from "react";
 
 export const Route = createFileRoute("/analytics")({
   component: Analytics,
@@ -11,35 +11,52 @@ export const Route = createFileRoute("/analytics")({
 });
 
 function Analytics() {
-  const events = useAnalytics();
-  const { profile } = useProfile();
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const { profile, loading: profileLoading } = useMyProfile();
+  const { events } = useMyAnalytics(profile?.id);
 
-  const { views, scans, clicks, ctr, last7, perLink } = useMemo(() => {
-    const views = events.filter((e) => e.type === "view").length;
-    const scans = events.filter((e) => e.type === "scan").length;
-    const clicks = events.filter((e) => e.type === "click").length;
+  useEffect(() => {
+    if (!authLoading && !user) navigate({ to: "/login" });
+  }, [authLoading, user, navigate]);
+
+  const stats = useMemo(() => {
+    const views = events.filter((e) => e.event_type === "view").length;
+    const scans = events.filter((e) => e.event_type === "scan").length;
+    const clicks = events.filter((e) => e.event_type === "click").length;
     const ctr = views > 0 ? Math.round((clicks / views) * 100) : 0;
 
     const now = Date.now();
     const last7 = Array.from({ length: 7 }).map((_, i) => {
       const dayStart = now - (6 - i) * 86400000;
       const dayEnd = dayStart + 86400000;
-      const v = events.filter((e) => e.type === "view" && e.ts >= dayStart && e.ts < dayEnd).length;
-      const c = events.filter((e) => e.type === "click" && e.ts >= dayStart && e.ts < dayEnd).length;
+      const v = events.filter((e) => e.event_type === "view" && new Date(e.created_at).getTime() >= dayStart && new Date(e.created_at).getTime() < dayEnd).length;
+      const c = events.filter((e) => e.event_type === "click" && new Date(e.created_at).getTime() >= dayStart && new Date(e.created_at).getTime() < dayEnd).length;
       return { day: new Date(dayStart).toLocaleDateString(undefined, { weekday: "short" }), v, c };
     });
 
-    const perLink = profile.links.map((l) => ({
-      ...l,
-      clicks: events.filter((e) => e.type === "click" && e.linkId === l.id).length,
-    })).sort((a, b) => b.clicks - a.clicks);
+    const linkClicks = new Map<string, number>();
+    for (const e of events) {
+      if (e.event_type === "click" && e.link_id) {
+        linkClicks.set(e.link_id, (linkClicks.get(e.link_id) ?? 0) + 1);
+      }
+    }
 
-    return { views, scans, clicks, ctr, last7, perLink };
-  }, [events, profile.links]);
+    return { views, scans, clicks, ctr, last7, linkClicks };
+  }, [events]);
 
-  const max = Math.max(1, ...last7.flatMap((d) => [d.v, d.c]));
+  if (authLoading || profileLoading || !profile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SiteHeader />
+        <div className="mx-auto max-w-6xl px-4 py-16 text-center text-muted-foreground sm:px-6">Loading…</div>
+      </div>
+    );
+  }
 
-  if (!profile.isPro) {
+  const max = Math.max(1, ...stats.last7.flatMap((d) => [d.v, d.c]));
+
+  if (!profile.is_pro) {
     return (
       <div className="min-h-screen bg-background">
         <SiteHeader />
@@ -69,28 +86,20 @@ function Analytics() {
         </div>
 
         <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Stat icon={<QrCode className="h-5 w-5" />} label="QR scans" value={scans} />
-          <Stat icon={<Eye className="h-5 w-5" />} label="Page views" value={views} />
-          <Stat icon={<MousePointerClick className="h-5 w-5" />} label="Link clicks" value={clicks} />
-          <Stat icon={<TrendingUp className="h-5 w-5" />} label="Click-through rate" value={`${ctr}%`} />
+          <Stat icon={<QrCode className="h-5 w-5" />} label="QR scans" value={stats.scans} />
+          <Stat icon={<Eye className="h-5 w-5" />} label="Page views" value={stats.views} />
+          <Stat icon={<MousePointerClick className="h-5 w-5" />} label="Link clicks" value={stats.clicks} />
+          <Stat icon={<TrendingUp className="h-5 w-5" />} label="Click-through rate" value={`${stats.ctr}%`} />
         </div>
 
         <section className="mb-8 rounded-2xl border border-border bg-gradient-card p-6 shadow-soft">
           <h2 className="mb-6 text-lg font-semibold">Last 7 days</h2>
           <div className="flex h-48 items-end justify-between gap-2">
-            {last7.map((d, i) => (
+            {stats.last7.map((d, i) => (
               <div key={i} className="flex flex-1 flex-col items-center gap-2">
                 <div className="flex w-full flex-1 items-end justify-center gap-1">
-                  <div
-                    className="w-1/2 rounded-t-md bg-primary/30 transition-all"
-                    style={{ height: `${(d.v / max) * 100}%`, minHeight: d.v > 0 ? "4px" : "0" }}
-                    title={`${d.v} views`}
-                  />
-                  <div
-                    className="w-1/2 rounded-t-md bg-gradient-brand transition-all"
-                    style={{ height: `${(d.c / max) * 100}%`, minHeight: d.c > 0 ? "4px" : "0" }}
-                    title={`${d.c} clicks`}
-                  />
+                  <div className="w-1/2 rounded-t-md bg-primary/30 transition-all" style={{ height: `${(d.v / max) * 100}%`, minHeight: d.v > 0 ? "4px" : "0" }} title={`${d.v} views`} />
+                  <div className="w-1/2 rounded-t-md bg-gradient-brand transition-all" style={{ height: `${(d.c / max) * 100}%`, minHeight: d.c > 0 ? "4px" : "0" }} title={`${d.c} clicks`} />
                 </div>
                 <span className="text-xs text-muted-foreground">{d.day}</span>
               </div>
@@ -102,38 +111,48 @@ function Analytics() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-border bg-card p-6 shadow-soft">
-          <h2 className="mb-4 text-lg font-semibold">Top links</h2>
-          {perLink.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">No links yet.</p>
-          ) : (
-            <ul className="space-y-2">
-              {perLink.map((l) => (
-                <li key={l.id} className="flex items-center gap-3 rounded-xl border border-border bg-background px-4 py-3">
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{l.title}</p>
-                    <p className="truncate text-xs text-muted-foreground">{l.url}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold">{l.clicks}</p>
-                    <p className="text-xs text-muted-foreground">clicks</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        <PerLink linkClicks={stats.linkClicks} profileId={profile.id} />
       </main>
     </div>
+  );
+}
+
+function PerLink({ linkClicks, profileId }: { linkClicks: Map<string, number>; profileId: string }) {
+  // Pull link metadata for sorting/display.
+  const { links } = require("@/lib/store").useMyLinks(profileId) as { links: Array<{ id: string; title: string; url: string }> };
+  const sorted = [...links]
+    .map((l) => ({ ...l, clicks: linkClicks.get(l.id) ?? 0 }))
+    .sort((a, b) => b.clicks - a.clicks);
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-6 shadow-soft">
+      <h2 className="mb-4 text-lg font-semibold">Top links</h2>
+      {sorted.length === 0 ? (
+        <p className="py-6 text-center text-sm text-muted-foreground">No links yet.</p>
+      ) : (
+        <ul className="space-y-2">
+          {sorted.map((l) => (
+            <li key={l.id} className="flex items-center gap-3 rounded-xl border border-border bg-background px-4 py-3">
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium">{l.title}</p>
+                <p className="truncate text-xs text-muted-foreground">{l.url}</p>
+              </div>
+              <div className="text-right">
+                <p className="font-semibold">{l.clicks}</p>
+                <p className="text-xs text-muted-foreground">clicks</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 
 function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
   return (
     <div className="rounded-2xl border border-border bg-gradient-card p-5 shadow-soft">
-      <div className="flex items-center gap-2 text-muted-foreground">
-        {icon}<span className="text-sm font-medium">{label}</span>
-      </div>
+      <div className="flex items-center gap-2 text-muted-foreground">{icon}<span className="text-sm font-medium">{label}</span></div>
       <p className="mt-2 text-3xl font-bold">{value}</p>
     </div>
   );
