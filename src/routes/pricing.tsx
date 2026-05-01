@@ -16,7 +16,7 @@ export const Route = createFileRoute("/pricing")({
 });
 
 function Pricing() {
-  const { profile, update } = useProfile();
+  const { profile, update } = useMyProfile();
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
