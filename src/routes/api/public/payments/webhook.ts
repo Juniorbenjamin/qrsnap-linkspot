@@ -33,7 +33,7 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
     return;
   }
 
-  await getSupabase().from('subscriptions').upsert(
+  await (getSupabase() as any).from('subscriptions').upsert(
     {
       user_id: userId,
       paddle_subscription_id: id,
@@ -53,7 +53,7 @@ async function handleSubscriptionCreated(data: any, env: PaddleEnv) {
 async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
   const { id, status, currentBillingPeriod, scheduledChange } = data;
 
-  await getSupabase().from('subscriptions')
+  await (getSupabase() as any).from('subscriptions')
     .update({
       status,
       current_period_start: currentBillingPeriod?.startsAt,
@@ -66,7 +66,7 @@ async function handleSubscriptionUpdated(data: any, env: PaddleEnv) {
 }
 
 async function handleSubscriptionCanceled(data: any, env: PaddleEnv) {
-  await getSupabase().from('subscriptions')
+  await (getSupabase() as any).from('subscriptions')
     .update({
       status: 'canceled',
       updated_at: new Date().toISOString(),
