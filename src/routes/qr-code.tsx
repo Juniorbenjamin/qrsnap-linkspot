@@ -13,20 +13,30 @@ export const Route = createFileRoute("/qr-code")({
   component: FreeQRPage,
   head: () => ({
     meta: [
-      { title: "Free QR Code Generator — QRLinkSpot" },
+      { title: "Free QR Code Generator — Make a QR Code in Seconds | QRLinkSpot" },
       {
         name: "description",
         content:
-          "Generate a free QR code for any URL — no signup required. Download as PNG in seconds.",
+          "Free online QR code generator. Paste any URL and download a high-resolution PNG QR code instantly — no signup, no watermark, no credit card. Works for websites, Instagram, menus, WiFi, and business cards.",
       },
-      { property: "og:title", content: "Free QR Code Generator — QRLinkSpot" },
+      {
+        name: "keywords",
+        content:
+          "free qr code generator, qr code maker, create qr code, qr code online, qr generator no signup, download qr code png, qr code for url, qr code for instagram, qr code for menu, qr code for business card",
+      },
+      { property: "og:title", content: "Free QR Code Generator — Make a QR Code in Seconds" },
       {
         property: "og:description",
-        content:
-          "Paste any link, get a downloadable QR code instantly. No account needed.",
+        content: "Paste any link, get a downloadable PNG QR code instantly. 100% free, no account needed.",
       },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://qrcodegenerator.life/qr-code" },
+      { name: "twitter:title", content: "Free QR Code Generator — QRLinkSpot" },
+      { name: "twitter:description", content: "Paste any link, get a downloadable PNG QR code instantly." },
     ],
+    links: [{ rel: "canonical", href: "https://qrcodegenerator.life/qr-code" }],
   }),
+
 });
 
 function isValidUrl(value: string) {
