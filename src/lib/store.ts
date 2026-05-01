@@ -1,130 +1,236 @@
-// Lightweight client-side store using localStorage. Replace with Lovable Cloud later.
+// Supabase-backed profile/links/auth helpers.
+// Replaces the previous localStorage prototype.
+
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
+
+export const FREE_LINK_LIMIT = 4;
 
 export type LinkItem = {
   id: string;
   title: string;
   url: string;
-  icon?: string;
+  position: number;
 };
 
 export type Theme = "midnight" | "sunset" | "ocean" | "forest" | "minimal";
 
 export type Profile = {
+  id: string;
   username: string;
-  displayName: string;
+  display_name: string;
   bio: string;
-  avatarEmoji: string;
+  avatar_emoji: string;
   theme: Theme;
-  qrColor: string;
-  qrBg: string;
-  logoText: string;
-  links: LinkItem[];
-  isPro: boolean;
+  qr_color: string;
+  qr_bg: string;
+  logo_text: string;
+  is_pro: boolean;
 };
 
-export type AuthUser = { email: string } | null;
-
-const PROFILE_KEY = "qrls_profile";
-const AUTH_KEY = "qrls_auth";
-const ANALYTICS_KEY = "qrls_analytics";
-
-export const FREE_LINK_LIMIT = 4;
-
-export const defaultProfile: Profile = {
-  username: "yourname",
-  displayName: "Your Name",
-  bio: "Tap a link to connect with me ✨",
-  avatarEmoji: "✨",
-  theme: "midnight",
-  qrColor: "#1a1a2e",
-  qrBg: "#ffffff",
-  logoText: "",
-  links: [
-    { id: "1", title: "My Website", url: "https://example.com" },
-    { id: "2", title: "Instagram", url: "https://instagram.com" },
-  ],
-  isPro: false,
+export type AnalyticsEvent = {
+  id: string;
+  profile_id: string;
+  link_id: string | null;
+  event_type: "view" | "scan" | "click";
+  source: "qr" | "direct" | null;
+  created_at: string;
 };
 
-function read<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
+// --------------------------------------------------------------------------
+// Auth
+// --------------------------------------------------------------------------
+
+export function useAuth() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Set up listener FIRST, then fetch session.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return {
+    user,
+    loading,
+    signOut: async () => {
+      await supabase.auth.signOut();
+    },
+  };
+}
+
+// --------------------------------------------------------------------------
+// Profile (current user)
+// --------------------------------------------------------------------------
+
+export function useMyProfile() {
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = async (uid: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", uid)
+      .maybeSingle();
+    if (data) setProfile(data as Profile);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (!user) { setProfile(null); setLoading(false); return; }
+    setLoading(true);
+    refresh(user.id);
+  }, [user?.id]);
+
+  const update = async (patch: Partial<Profile>) => {
+    if (!profile) return;
+    const optimistic = { ...profile, ...patch };
+    setProfile(optimistic);
+    const { error } = await supabase
+      .from("profiles")
+      .update(patch)
+      .eq("id", profile.id);
+    if (error) {
+      // revert on failure
+      setProfile(profile);
+      throw error;
+    }
+  };
+
+  return { profile, loading, update, refresh: () => user && refresh(user.id) };
+}
+
+// --------------------------------------------------------------------------
+// Links (current user)
+// --------------------------------------------------------------------------
+
+export function useMyLinks(profileId: string | undefined) {
+  const [links, setLinks] = useState<LinkItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = async () => {
+    if (!profileId) { setLinks([]); setLoading(false); return; }
+    const { data } = await supabase
+      .from("links")
+      .select("*")
+      .eq("profile_id", profileId)
+      .order("position", { ascending: true })
+      .order("created_at", { ascending: true });
+    setLinks((data ?? []) as LinkItem[]);
+    setLoading(false);
+  };
+
+  useEffect(() => { refresh(); }, [profileId]);
+
+  return {
+    links,
+    loading,
+    refresh,
+    add: async (title: string, url: string) => {
+      if (!profileId) return;
+      const position = links.length;
+      const { error } = await supabase
+        .from("links")
+        .insert({ profile_id: profileId, title, url, position });
+      if (error) throw error;
+      await refresh();
+    },
+    update: async (id: string, patch: { title?: string; url?: string }) => {
+      const { error } = await supabase.from("links").update(patch).eq("id", id);
+      if (error) throw error;
+      await refresh();
+    },
+    remove: async (id: string) => {
+      const { error } = await supabase.from("links").delete().eq("id", id);
+      if (error) throw error;
+      await refresh();
+    },
+  };
+}
+
+// --------------------------------------------------------------------------
+// Public profile lookup (by username) — used by /u/$username and tracking
+// --------------------------------------------------------------------------
+
+export async function fetchPublicProfile(username: string): Promise<{ profile: Profile | null; links: LinkItem[] }> {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("username", username)
+    .maybeSingle();
+  if (!profile) return { profile: null, links: [] };
+  const { data: links } = await supabase
+    .from("links")
+    .select("*")
+    .eq("profile_id", profile.id)
+    .order("position", { ascending: true })
+    .order("created_at", { ascending: true });
+  return { profile: profile as Profile, links: (links ?? []) as LinkItem[] };
+}
+
+// --------------------------------------------------------------------------
+// Analytics — anyone can insert (RLS allows it), only owner reads
+// --------------------------------------------------------------------------
+
+export async function trackEvent(input: {
+  profile_id: string;
+  link_id?: string | null;
+  event_type: "view" | "scan" | "click";
+  source?: "qr" | "direct" | null;
+}) {
+  // Fire and forget; any error is silently swallowed so it never blocks a
+  // user navigating to a link.
   try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
+    await supabase.from("scan_events").insert({
+      profile_id: input.profile_id,
+      link_id: input.link_id ?? null,
+      event_type: input.event_type,
+      source: input.source ?? null,
+    });
   } catch {
-    return fallback;
+    /* ignore */
   }
 }
 
-function write<T>(key: string, val: T) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(key, JSON.stringify(val));
-  window.dispatchEvent(new CustomEvent("qrls:update", { detail: { key } }));
-}
+export function useMyAnalytics(profileId: string | undefined) {
+  const [events, setEvents] = useState<AnalyticsEvent[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export function useProfile() {
-  const [profile, setProfile] = useState<Profile>(() => read(PROFILE_KEY, defaultProfile));
   useEffect(() => {
-    const handler = () => setProfile(read(PROFILE_KEY, defaultProfile));
-    window.addEventListener("qrls:update", handler);
-    window.addEventListener("storage", handler);
-    return () => {
-      window.removeEventListener("qrls:update", handler);
-      window.removeEventListener("storage", handler);
-    };
-  }, []);
-  const update = (patch: Partial<Profile>) => {
-    const next = { ...profile, ...patch };
-    write(PROFILE_KEY, next);
-    setProfile(next);
-  };
-  return { profile, update, setProfile: (p: Profile) => { write(PROFILE_KEY, p); setProfile(p); } };
+    let alive = true;
+    if (!profileId) { setEvents([]); setLoading(false); return; }
+    setLoading(true);
+    supabase
+      .from("scan_events")
+      .select("*")
+      .eq("profile_id", profileId)
+      .order("created_at", { ascending: false })
+      .limit(1000)
+      .then(({ data }) => {
+        if (!alive) return;
+        setEvents((data ?? []) as AnalyticsEvent[]);
+        setLoading(false);
+      });
+    return () => { alive = false; };
+  }, [profileId]);
+
+  return { events, loading };
 }
 
-export function useAuth() {
-  const [user, setUser] = useState<AuthUser>(() => read<AuthUser>(AUTH_KEY, null));
-  useEffect(() => {
-    const handler = () => setUser(read<AuthUser>(AUTH_KEY, null));
-    window.addEventListener("qrls:update", handler);
-    return () => window.removeEventListener("qrls:update", handler);
-  }, []);
-  return {
-    user,
-    signIn: (email: string) => { write(AUTH_KEY, { email }); setUser({ email }); },
-    signOut: () => { write(AUTH_KEY, null); setUser(null); },
-  };
-}
-
-export type AnalyticsEvent = {
-  type: "view" | "scan" | "click";
-  linkId?: string;
-  ts: number;
-  source?: "qr" | "direct";
-};
-
-export function getAnalytics(): AnalyticsEvent[] {
-  return read<AnalyticsEvent[]>(ANALYTICS_KEY, []);
-}
-
-export function trackEvent(ev: Omit<AnalyticsEvent, "ts">) {
-  // Persist synchronously BEFORE any navigation happens. localStorage.setItem
-  // is synchronous, so the write is committed even if the browser immediately
-  // navigates away (e.g. on a link click).
-  const events = getAnalytics();
-  events.push({ ...ev, ts: Date.now() });
-  write(ANALYTICS_KEY, events);
-}
-
-export function useAnalytics() {
-  const [events, setEvents] = useState<AnalyticsEvent[]>(() => getAnalytics());
-  useEffect(() => {
-    const handler = () => setEvents(getAnalytics());
-    window.addEventListener("qrls:update", handler);
-    return () => window.removeEventListener("qrls:update", handler);
-  }, []);
-  return events;
-}
+// --------------------------------------------------------------------------
+// Themes
+// --------------------------------------------------------------------------
 
 export const themes: Record<Theme, { name: string; bg: string; card: string; text: string; muted: string; accent: string }> = {
   midnight: {
