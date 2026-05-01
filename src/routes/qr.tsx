@@ -35,7 +35,7 @@ function QRPage() {
           <div className="rounded-2xl border border-border bg-gradient-card p-8 shadow-soft">
             <div className="flex justify-center">
               <QRPreview
-                value={publicUrl}
+                value={qrTarget}
                 fgColor={isPro ? profile.qrColor : "#1a1a2e"}
                 bgColor={isPro ? profile.qrBg : "#ffffff"}
                 logoText={isPro ? profile.logoText : ""}
