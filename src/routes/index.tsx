@@ -34,6 +34,7 @@ export const Route = createFileRoute("/")({
         content:
           "Stop losing customers to bad business cards. Create a free branded QR code + link-in-bio page in 90 seconds. Used by 10,000+ pros to get more bookings, sales & followers.",
       },
+      { name: "google-site-verification", content: "z8vNrb60E3ng77luq0kaPpZSsrWZ_2pT7T_zLhMcGsQ" },
     ],
   }),
 });
