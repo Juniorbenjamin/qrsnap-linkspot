@@ -52,9 +52,14 @@ export type Database = {
       profiles: {
         Row: {
           avatar_emoji: string
+          bg_color: string
           bio: string
+          button_color: string
+          button_style: string
+          button_text_color: string
           created_at: string
           display_name: string
+          font_weight: string
           id: string
           is_pro: boolean
           logo_text: string
@@ -66,9 +71,14 @@ export type Database = {
         }
         Insert: {
           avatar_emoji?: string
+          bg_color?: string
           bio?: string
+          button_color?: string
+          button_style?: string
+          button_text_color?: string
           created_at?: string
           display_name?: string
+          font_weight?: string
           id: string
           is_pro?: boolean
           logo_text?: string
@@ -80,9 +90,14 @@ export type Database = {
         }
         Update: {
           avatar_emoji?: string
+          bg_color?: string
           bio?: string
+          button_color?: string
+          button_style?: string
+          button_text_color?: string
           created_at?: string
           display_name?: string
+          font_weight?: string
           id?: string
           is_pro?: boolean
           logo_text?: string
