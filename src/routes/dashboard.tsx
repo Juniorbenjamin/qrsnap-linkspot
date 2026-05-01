@@ -316,3 +316,35 @@ function StatCard({ icon, label, value, sub }: { icon: React.ReactNode; label: s
     </div>
   );
 }
+
+function ColorField({ label, value, onSave }: { label: string; value: string; onSave: (v: string) => void }) {
+  const [local, setLocal] = useState(value);
+  useEffect(() => { setLocal(value); }, [value]);
+  const isValid = local === "" || /^#[0-9A-Fa-f]{6}$/.test(local);
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={local || "#ffffff"}
+          onChange={(e) => setLocal(e.target.value)}
+          onBlur={() => isValid && local !== value && onSave(local)}
+          className="h-10 w-12 cursor-pointer rounded-md border border-border bg-background"
+        />
+        <Input
+          value={local}
+          placeholder="Use theme"
+          onChange={(e) => setLocal(e.target.value)}
+          onBlur={() => isValid && local !== value && onSave(local)}
+          className="flex-1"
+        />
+        {local && (
+          <Button type="button" variant="ghost" size="sm" onClick={() => { setLocal(""); onSave(""); }}>
+            Reset
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
