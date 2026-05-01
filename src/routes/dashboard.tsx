@@ -19,7 +19,10 @@ function Dashboard() {
   const views = events.filter((e) => e.type === "view").length;
   const clicks = events.filter((e) => e.type === "click").length;
 
-  const publicUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/u/${profile.username}`;
+  // Friendly URL to display, and a stable QR target that always resolves to the
+  // published site (and tags the visit as a QR scan for analytics).
+  const publicUrl = publicProfileUrl(profile.username);
+  const qrTarget = `${publicUrl}?src=qr`;
   const linksLeft = profile.isPro ? "∞" : Math.max(0, FREE_LINK_LIMIT - profile.links.length);
 
   const removeLink = (id: string) => {
