@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { useAnalytics, useProfile } from "@/lib/store";
-import { Eye, MousePointerClick, TrendingUp, Crown, Lock } from "lucide-react";
+import { Eye, MousePointerClick, TrendingUp, Crown, Lock, QrCode } from "lucide-react";
 import { useMemo } from "react";
 
 export const Route = createFileRoute("/analytics")({
