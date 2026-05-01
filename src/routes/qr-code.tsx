@@ -42,6 +42,55 @@ function FreeQRPage() {
   const [url, setUrl] = useState("");
   const trimmed = url.trim();
   const valid = isValidUrl(trimmed);
+  const qrWrapRef = useRef<HTMLDivElement>(null);
+
+  const getCanvas = () =>
+    qrWrapRef.current?.querySelector("canvas") as HTMLCanvasElement | null;
+
+  const handleDownload = () => {
+    const canvas = getCanvas();
+    if (!canvas) return;
+    try {
+      const dataUrl = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = "qrlinkspot-qr.png";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      toast.success("QR code downloaded");
+    } catch {
+      toast.error("Could not download QR code");
+    }
+  };
+
+  const handlePrint = () => {
+    const canvas = getCanvas();
+    if (!canvas) return;
+    const dataUrl = canvas.toDataURL("image/png");
+    const w = window.open("", "_blank", "width=600,height=700");
+    if (!w) {
+      toast.error("Pop-up blocked — allow pop-ups to print");
+      return;
+    }
+    const safeUrl = trimmed.replace(/[<>&"']/g, (c) =>
+      ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&#39;" }[c]!),
+    );
+    w.document.write(`<!doctype html><html><head><title>Print QR code</title>
+      <style>
+        body { margin:0; display:flex; align-items:center; justify-content:center; min-height:100vh; font-family: system-ui, sans-serif; }
+        .wrap { text-align:center; padding:24px; }
+        img { width: 320px; height: 320px; image-rendering: pixelated; }
+        p { margin-top:16px; font-size:12px; color:#555; word-break:break-all; }
+      </style></head><body>
+      <div class="wrap">
+        <img src="${dataUrl}" alt="QR code" />
+        <p>${safeUrl}</p>
+      </div>
+      <script>window.onload = () => { setTimeout(() => { window.print(); }, 150); };</script>
+      </body></html>`);
+    w.document.close();
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
