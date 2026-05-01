@@ -15,7 +15,10 @@ export const Route = createFileRoute("/qr")({
 
 function QRPage() {
   const { profile, update } = useProfile();
-  const publicUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/u/${profile.username}`;
+  // QR codes are printed on flyers, signs, business cards — they need a stable
+  // public URL that survives renames and points at the published deployment.
+  const publicUrl = publicProfileUrl(profile.username);
+  const qrTarget = `${publicUrl}?src=qr`;
   const isPro = profile.isPro;
 
   return (
