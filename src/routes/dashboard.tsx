@@ -1,5 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,25 +7,60 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { QRPreview } from "@/components/QRPreview";
 import { useAuth, useMyProfile, useMyLinks, useMyAnalytics, FREE_LINK_LIMIT } from "@/lib/store";
+import { useSubscription } from "@/hooks/useSubscription";
+import { createCustomerPortalSession } from "@/server/payments.functions";
+import { getPaddleEnvironment } from "@/lib/paddle";
 import { publicProfileUrl } from "@/lib/public-url";
-import { Plus, ExternalLink, Trash2, Eye, MousePointerClick, Crown, Pencil, QrCode } from "lucide-react";
+import { Plus, ExternalLink, Trash2, Eye, MousePointerClick, Crown, Pencil, QrCode, CreditCard, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
+  validateSearch: (s: Record<string, unknown>) => ({ checkout: typeof s.checkout === "string" ? s.checkout : undefined }),
   head: () => ({ meta: [{ title: "Dashboard — QRLinkSpot" }] }),
 });
 
 function Dashboard() {
   const navigate = useNavigate();
+  const search = useSearch({ from: "/dashboard" });
   const { user, loading: authLoading } = useAuth();
-  const { profile, loading: profileLoading, update } = useMyProfile();
+  const { profile, loading: profileLoading, update, refresh } = useMyProfile();
   const { links, remove } = useMyLinks(profile?.id);
   const { events } = useMyAnalytics(profile?.id);
+  const { subscription, isActive, cancelAtPeriodEnd, isPastDue } = useSubscription();
+  const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/login" });
   }, [authLoading, user, navigate]);
+
+  // After successful checkout, poll for the webhook to write the subscription row.
+  useEffect(() => {
+    if (search.checkout !== "success" || !user) return;
+    toast.success("Welcome to Pro! Your features are unlocking…");
+    let attempts = 0;
+    const id = setInterval(async () => {
+      attempts++;
+      await refresh();
+      if (attempts >= 8) clearInterval(id);
+    }, 1500);
+    return () => clearInterval(id);
+  }, [search.checkout, user?.id]);
+
+  const openPortal = async () => {
+    if (!user) return;
+    setPortalLoading(true);
+    try {
+      const { url } = await createCustomerPortalSession({
+        data: { userId: user.id, environment: getPaddleEnvironment() },
+      });
+      window.open(url, "_blank");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not open billing portal");
+    } finally {
+      setPortalLoading(false);
+    }
+  };
 
   if (authLoading || profileLoading || !profile) {
     return (
@@ -64,11 +99,32 @@ function Dashboard() {
                 <ExternalLink className="mr-2 h-4 w-4" /> View public page
               </a>
             </Button>
+            {subscription ? (
+              <Button variant="outline" onClick={openPortal} disabled={portalLoading}>
+                {portalLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
+                Manage subscription
+              </Button>
+            ) : (
+              <Button asChild variant="outline">
+                <Link to="/pricing"><Crown className="mr-2 h-4 w-4" /> Upgrade to Pro</Link>
+              </Button>
+            )}
             <Button asChild variant="brand">
               <Link to="/links/$id" params={{ id: "new" }}><Plus className="mr-2 h-4 w-4" /> Add link</Link>
             </Button>
           </div>
         </div>
+
+        {isPastDue && (
+          <div className="mb-6 rounded-xl border border-orange-300 bg-orange-50 p-4 text-sm text-orange-900">
+            <strong>Payment failed.</strong> Update your card in the billing portal to keep Pro features.
+          </div>
+        )}
+        {isActive && cancelAtPeriodEnd && subscription?.current_period_end && (
+          <div className="mb-6 rounded-xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+            Your Pro plan is set to cancel on {new Date(subscription.current_period_end).toLocaleDateString()}. You'll keep Pro features until then.
+          </div>
+        )}
 
         <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard icon={<QrCode className="h-5 w-5" />} label="QR scans" value={scans} />
