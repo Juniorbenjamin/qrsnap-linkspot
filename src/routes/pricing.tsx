@@ -12,10 +12,27 @@ export const Route = createFileRoute("/pricing")({
   component: Pricing,
   head: () => ({
     meta: [
-      { title: "Pricing — QRLinkSpot" },
-      { name: "description", content: "Simple pricing. Free forever, or upgrade to Pro for unlimited links, custom QR, and analytics." },
+      { title: "Pricing — Free Forever or Pro from $5/mo | QRLinkSpot" },
+      {
+        name: "description",
+        content:
+          "Simple, transparent pricing. Free forever plan with unlimited QR scans. Upgrade to Pro for unlimited links, custom branded QR codes with logo, and real-time analytics.",
+      },
+      {
+        name: "keywords",
+        content:
+          "qr code generator pricing, free link in bio, linktree alternative pricing, custom qr code price, qr code analytics, qr code with logo cost",
+      },
+      { property: "og:title", content: "QRLinkSpot Pricing — Free Forever or Pro" },
+      {
+        property: "og:description",
+        content: "Free forever plan + affordable Pro upgrade. No contracts. Cancel anytime.",
+      },
+      { property: "og:url", content: "https://qrcodegenerator.life/pricing" },
     ],
+    links: [{ rel: "canonical", href: "https://qrcodegenerator.life/pricing" }],
   }),
+
 });
 
 function Pricing() {
