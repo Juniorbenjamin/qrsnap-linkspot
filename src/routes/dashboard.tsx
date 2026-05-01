@@ -162,6 +162,93 @@ function Dashboard() {
 
             <section className="rounded-2xl border border-border bg-card p-6 shadow-soft">
               <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Customize your link page</h2>
+                <a href={`/u/${profile.username}`} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline">
+                  Preview ↗
+                </a>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Theme</Label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                  {(Object.keys(themes) as Theme[]).map((key) => {
+                    const th = themes[key];
+                    const active = profile.theme === key;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => update({ theme: key }).catch(() => toast.error("Save failed"))}
+                        className={`group relative overflow-hidden rounded-xl border-2 p-2 text-left transition-all ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}
+                      >
+                        <div className="h-12 w-full rounded-md" style={{ background: th.bg }} />
+                        <p className="mt-2 text-xs font-medium">{th.name}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-3">
+                <ColorField label="Background color" value={profile.bg_color} onSave={(v) => update({ bg_color: v }).catch(() => toast.error("Save failed"))} />
+                <ColorField label="Button color" value={profile.button_color} onSave={(v) => update({ button_color: v }).catch(() => toast.error("Save failed"))} />
+                <ColorField label="Text color" value={profile.button_text_color} onSave={(v) => update({ button_text_color: v }).catch(() => toast.error("Save failed"))} />
+              </div>
+
+              <div className="mt-6 space-y-2">
+                <Label>Button style</Label>
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {(["rounded", "pill", "square", "outline"] as ButtonStyle[]).map((style) => {
+                    const active = profile.button_style === style;
+                    const radius = style === "pill" ? "9999px" : style === "square" ? "6px" : "16px";
+                    return (
+                      <button
+                        key={style}
+                        type="button"
+                        onClick={() => update({ button_style: style }).catch(() => toast.error("Save failed"))}
+                        className={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}
+                      >
+                        <div
+                          className="h-8 w-full bg-primary"
+                          style={{
+                            background: style === "outline" ? "transparent" : undefined,
+                            border: style === "outline" ? "2px solid hsl(var(--primary))" : "none",
+                            borderRadius: radius,
+                          }}
+                        />
+                        <span className="text-xs font-medium capitalize">{style}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-2">
+                <Label>Text boldness</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {(["normal", "semibold", "bold"] as FontWeight[]).map((fw) => {
+                    const active = profile.font_weight === fw;
+                    return (
+                      <button
+                        key={fw}
+                        type="button"
+                        onClick={() => update({ font_weight: fw }).catch(() => toast.error("Save failed"))}
+                        className={`rounded-xl border-2 p-3 text-center transition-all ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"} ${fw === "bold" ? "font-bold" : fw === "normal" ? "font-normal" : "font-semibold"}`}
+                      >
+                        Aa <span className="ml-1 text-xs capitalize text-muted-foreground">{fw}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <p className="mt-4 text-xs text-muted-foreground">
+                Custom colors override the theme. Leave a color empty to use the theme default.
+              </p>
+            </section>
+
+            <section className="rounded-2xl border border-border bg-card p-6 shadow-soft">
+              <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Your links</h2>
                 <span className="text-sm text-muted-foreground">{links.length} {!profile.is_pro && `/ ${FREE_LINK_LIMIT}`}</span>
               </div>
