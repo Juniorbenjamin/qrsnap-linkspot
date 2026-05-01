@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { QRPreview } from "@/components/QRPreview";
 import { useProfile, themes, type Theme } from "@/lib/store";
+import { publicProfileUrl } from "@/lib/public-url";
 import { Crown, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/qr")({
