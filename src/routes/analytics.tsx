@@ -68,7 +68,8 @@ function Analytics() {
           <p className="mt-1 text-muted-foreground">Track your QR scans and link performance.</p>
         </div>
 
-        <div className="mb-8 grid gap-4 sm:grid-cols-3">
+        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Stat icon={<QrCode className="h-5 w-5" />} label="QR scans" value={scans} />
           <Stat icon={<Eye className="h-5 w-5" />} label="Page views" value={views} />
           <Stat icon={<MousePointerClick className="h-5 w-5" />} label="Link clicks" value={clicks} />
           <Stat icon={<TrendingUp className="h-5 w-5" />} label="Click-through rate" value={`${ctr}%`} />
