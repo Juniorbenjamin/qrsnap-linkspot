@@ -1,5 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,12 +7,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { QRPreview } from "@/components/QRPreview";
 import { useAuth, useMyProfile, useMyLinks, useMyAnalytics, FREE_LINK_LIMIT } from "@/lib/store";
+import { useSubscription } from "@/hooks/useSubscription";
+import { createCustomerPortalSession } from "@/server/payments.functions";
+import { getPaddleEnvironment } from "@/lib/paddle";
 import { publicProfileUrl } from "@/lib/public-url";
-import { Plus, ExternalLink, Trash2, Eye, MousePointerClick, Crown, Pencil, QrCode } from "lucide-react";
+import { Plus, ExternalLink, Trash2, Eye, MousePointerClick, Crown, Pencil, QrCode, CreditCard, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
+  validateSearch: (s: Record<string, unknown>) => ({ checkout: typeof s.checkout === "string" ? s.checkout : undefined }),
   head: () => ({ meta: [{ title: "Dashboard — QRLinkSpot" }] }),
 });
 
