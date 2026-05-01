@@ -1,9 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
-import { useMyProfile } from "@/lib/store";
-import { Check, Crown, Sparkles } from "lucide-react";
+import { useAuth, useMyProfile } from "@/lib/store";
+import { useSubscription } from "@/hooks/useSubscription";
+import { usePaddleCheckout } from "@/hooks/usePaddleCheckout";
+import { Check, Crown, Loader2, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/pricing")({
   component: Pricing,
@@ -16,7 +19,30 @@ export const Route = createFileRoute("/pricing")({
 });
 
 function Pricing() {
-  const { profile, update } = useMyProfile();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { profile } = useMyProfile();
+  const { isActive, cancelAtPeriodEnd, subscription } = useSubscription();
+  const { openCheckout, loading } = usePaddleCheckout();
+
+  const handleUpgrade = async () => {
+    if (!user) {
+      navigate({ to: "/signup" });
+      return;
+    }
+    try {
+      await openCheckout({
+        priceId: "pro_monthly",
+        customerEmail: user.email ?? undefined,
+        customData: { userId: user.id },
+        successUrl: `${window.location.origin}/dashboard?checkout=success`,
+      });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not open checkout");
+    }
+  };
+
+  const isPro = isActive || profile?.is_pro;
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -46,13 +72,13 @@ function Pricing() {
                 "Public link-in-bio page",
               ]}
               cta={
-                profile?.is_pro ? (
-                  <Button variant="outline" size="lg" className="w-full" onClick={() => update({ is_pro: false })}>
-                    Switch to Free
+                isPro ? (
+                  <Button variant="outline" size="lg" className="w-full" disabled>
+                    Included in Pro
                   </Button>
                 ) : (
                   <Button asChild variant="outline" size="lg" className="w-full">
-                    <Link to="/signup">Get started free</Link>
+                    <Link to={user ? "/dashboard" : "/signup"}>{user ? "Go to dashboard" : "Get started free"}</Link>
                   </Button>
                 )
               }
@@ -73,22 +99,30 @@ function Pricing() {
                 "Priority support",
               ]}
               cta={
-                profile?.is_pro ? (
+                isPro ? (
                   <Button variant="hero" size="lg" className="w-full" disabled>
-                    <Check className="mr-2 h-4 w-4" /> You're on Pro
+                    <Check className="mr-2 h-4 w-4" />
+                    {cancelAtPeriodEnd ? "Pro until period ends" : "You're on Pro"}
                   </Button>
                 ) : (
-                  <Button variant="brand" size="lg" className="w-full" onClick={() => update({ is_pro: true })}>
-                    <Crown className="mr-2 h-4 w-4" /> Upgrade to Pro
+                  <Button variant="brand" size="lg" className="w-full" onClick={handleUpgrade} disabled={loading}>
+                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Crown className="mr-2 h-4 w-4" />}
+                    Upgrade to Pro
                   </Button>
                 )
               }
             />
           </div>
 
+          {subscription?.status === "past_due" && (
+            <div className="mx-auto mt-8 max-w-md rounded-xl border border-orange-300 bg-orange-50 p-4 text-center text-sm text-orange-900">
+              Your last payment failed. Please update your card to keep Pro features.
+            </div>
+          )}
+
           <p className="mx-auto mt-8 max-w-md text-center text-xs text-muted-foreground">
             <Sparkles className="mr-1 inline h-3 w-3" />
-            Demo: clicking Upgrade instantly toggles Pro features so you can try them out.
+            Cancel anytime. You'll keep Pro features until the end of your billing period.
           </p>
         </section>
       </main>
