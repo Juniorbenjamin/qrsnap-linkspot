@@ -127,7 +127,7 @@ function Dashboard() {
             <div className="rounded-2xl border border-border bg-gradient-card p-6 shadow-soft">
               <h2 className="mb-4 text-lg font-semibold">Your QR code</h2>
               <QRPreview
-                value={publicUrl}
+                value={qrTarget}
                 fgColor={profile.isPro ? profile.qrColor : "#1a1a2e"}
                 bgColor={profile.isPro ? profile.qrBg : "#ffffff"}
                 logoText={profile.isPro ? profile.logoText : ""}
