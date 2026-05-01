@@ -303,6 +303,7 @@ function Dashboard() {
                 fgColor={profile.is_pro ? profile.qr_color : "#1a1a2e"}
                 bgColor={profile.is_pro ? profile.qr_bg : "#ffffff"}
                 logoText={profile.is_pro ? profile.logo_text : ""}
+                logoUrl={profile.is_pro ? profile.logo_url : ""}
               />
               <p className="mt-4 break-all text-center text-xs text-muted-foreground">{publicUrl}</p>
               <Button asChild variant="outline" className="mt-4 w-full">
