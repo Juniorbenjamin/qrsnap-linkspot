@@ -99,11 +99,32 @@ function Dashboard() {
                 <ExternalLink className="mr-2 h-4 w-4" /> View public page
               </a>
             </Button>
+            {subscription ? (
+              <Button variant="outline" onClick={openPortal} disabled={portalLoading}>
+                {portalLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
+                Manage subscription
+              </Button>
+            ) : (
+              <Button asChild variant="outline">
+                <Link to="/pricing"><Crown className="mr-2 h-4 w-4" /> Upgrade to Pro</Link>
+              </Button>
+            )}
             <Button asChild variant="brand">
               <Link to="/links/$id" params={{ id: "new" }}><Plus className="mr-2 h-4 w-4" /> Add link</Link>
             </Button>
           </div>
         </div>
+
+        {isPastDue && (
+          <div className="mb-6 rounded-xl border border-orange-300 bg-orange-50 p-4 text-sm text-orange-900">
+            <strong>Payment failed.</strong> Update your card in the billing portal to keep Pro features.
+          </div>
+        )}
+        {isActive && cancelAtPeriodEnd && subscription?.current_period_end && (
+          <div className="mb-6 rounded-xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+            Your Pro plan is set to cancel on {new Date(subscription.current_period_end).toLocaleDateString()}. You'll keep Pro features until then.
+          </div>
+        )}
 
         <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard icon={<QrCode className="h-5 w-5" />} label="QR scans" value={scans} />
