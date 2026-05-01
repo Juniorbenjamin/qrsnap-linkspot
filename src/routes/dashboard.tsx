@@ -22,14 +22,45 @@ export const Route = createFileRoute("/dashboard")({
 
 function Dashboard() {
   const navigate = useNavigate();
+  const search = useSearch({ from: "/dashboard" });
   const { user, loading: authLoading } = useAuth();
-  const { profile, loading: profileLoading, update } = useMyProfile();
+  const { profile, loading: profileLoading, update, refresh } = useMyProfile();
   const { links, remove } = useMyLinks(profile?.id);
   const { events } = useMyAnalytics(profile?.id);
+  const { subscription, isActive, cancelAtPeriodEnd, isPastDue } = useSubscription();
+  const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/login" });
   }, [authLoading, user, navigate]);
+
+  // After successful checkout, poll for the webhook to write the subscription row.
+  useEffect(() => {
+    if (search.checkout !== "success" || !user) return;
+    toast.success("Welcome to Pro! Your features are unlocking…");
+    let attempts = 0;
+    const id = setInterval(async () => {
+      attempts++;
+      await refresh();
+      if (attempts >= 8) clearInterval(id);
+    }, 1500);
+    return () => clearInterval(id);
+  }, [search.checkout, user?.id]);
+
+  const openPortal = async () => {
+    if (!user) return;
+    setPortalLoading(true);
+    try {
+      const { url } = await createCustomerPortalSession({
+        data: { userId: user.id, environment: getPaddleEnvironment() },
+      });
+      window.open(url, "_blank");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not open billing portal");
+    } finally {
+      setPortalLoading(false);
+    }
+  };
 
   if (authLoading || profileLoading || !profile) {
     return (
