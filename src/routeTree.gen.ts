@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
+import { Route as QrCodeRouteImport } from './routes/qr-code'
 import { Route as QrRouteImport } from './routes/qr'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -36,6 +37,11 @@ const SignupRoute = SignupRouteImport.update({
 const RefundPolicyRoute = RefundPolicyRouteImport.update({
   id: '/refund-policy',
   path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrCodeRoute = QrCodeRouteImport.update({
+  id: '/qr-code',
+  path: '/qr-code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QrRoute = QrRouteImport.update({
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
+  '/qr-code': typeof QrCodeRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
+  '/qr-code': typeof QrCodeRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
+  '/qr-code': typeof QrCodeRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/qr'
+    | '/qr-code'
     | '/refund-policy'
     | '/signup'
     | '/terms'
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/qr'
+    | '/qr-code'
     | '/refund-policy'
     | '/signup'
     | '/terms'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/qr'
+    | '/qr-code'
     | '/refund-policy'
     | '/signup'
     | '/terms'
@@ -192,6 +204,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   QrRoute: typeof QrRoute
+  QrCodeRoute: typeof QrCodeRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
@@ -221,6 +234,13 @@ declare module '@tanstack/react-router' {
       path: '/refund-policy'
       fullPath: '/refund-policy'
       preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-code': {
+      id: '/qr-code'
+      path: '/qr-code'
+      fullPath: '/qr-code'
+      preLoaderRoute: typeof QrCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/qr': {
@@ -304,6 +324,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   QrRoute: QrRoute,
+  QrCodeRoute: QrCodeRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
@@ -314,3 +335,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
