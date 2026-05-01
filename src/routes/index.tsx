@@ -37,14 +37,17 @@ function Home() {
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button asChild variant="brand" size="xl">
-                  <Link to="/signup">
-                    Create your QR free <ArrowRight className="ml-1 h-5 w-5" />
+                  <Link to="/qr-code">
+                    Get a free QR code <ArrowRight className="ml-1 h-5 w-5" />
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="xl">
-                  <Link to="/pricing">See pricing</Link>
+                  <Link to="/signup">Create Socials Hub</Link>
                 </Button>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Just need a QR for one link? <Link to="/qr-code" className="font-medium text-foreground underline-offset-4 hover:underline">No signup required</Link>.
+              </p>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1.5"><Check className="h-4 w-4 text-success" /> No credit card</div>
                 <div className="flex items-center gap-1.5"><Check className="h-4 w-4 text-success" /> Free forever plan</div>

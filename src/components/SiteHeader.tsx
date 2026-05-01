@@ -33,6 +33,7 @@ export function SiteHeader() {
 
         <nav className="hidden items-center gap-8 md:flex">
           {navItem("/", "Home")}
+          {navItem("/qr-code", "Free QR")}
           {navItem("/pricing", "Pricing")}
           {user && navItem("/dashboard", "Dashboard")}
           {user && navItem("/analytics", "Analytics")}
@@ -69,6 +70,7 @@ export function SiteHeader() {
         <div className="border-t border-border/60 bg-background md:hidden">
           <div className="flex flex-col gap-4 px-4 py-4">
             {navItem("/", "Home")}
+            {navItem("/qr-code", "Free QR")}
             {navItem("/pricing", "Pricing")}
             {user && navItem("/dashboard", "Dashboard")}
             {user && navItem("/analytics", "Analytics")}
