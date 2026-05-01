@@ -157,6 +157,14 @@ function Dashboard() {
                   <Label htmlFor="emoji">Avatar emoji</Label>
                   <Input id="emoji" defaultValue={profile.avatar_emoji} maxLength={2} onBlur={(e) => update({ avatar_emoji: e.target.value || "✨" }).catch(() => {})} />
                 </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label>Logo (shown on your link page & QR)</Label>
+                  <LogoUploader
+                    userId={profile.id}
+                    currentUrl={profile.logo_url}
+                    onChange={(url) => update({ logo_url: url }).catch(() => toast.error("Save failed"))}
+                  />
+                </div>
               </div>
             </section>
 
