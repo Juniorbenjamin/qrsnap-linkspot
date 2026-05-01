@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { QRPreview } from "@/components/QRPreview";
 import { useProfile, FREE_LINK_LIMIT, useAnalytics } from "@/lib/store";
+import { publicProfileUrl } from "@/lib/public-url";
 import { Plus, ExternalLink, Trash2, Eye, MousePointerClick, Crown, Pencil } from "lucide-react";
 
 export const Route = createFileRoute("/dashboard")({
@@ -19,7 +20,10 @@ function Dashboard() {
   const views = events.filter((e) => e.type === "view").length;
   const clicks = events.filter((e) => e.type === "click").length;
 
-  const publicUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/u/${profile.username}`;
+  // Friendly URL to display, and a stable QR target that always resolves to the
+  // published site (and tags the visit as a QR scan for analytics).
+  const publicUrl = publicProfileUrl(profile.username);
+  const qrTarget = `${publicUrl}?src=qr`;
   const linksLeft = profile.isPro ? "∞" : Math.max(0, FREE_LINK_LIMIT - profile.links.length);
 
   const removeLink = (id: string) => {
@@ -123,7 +127,7 @@ function Dashboard() {
             <div className="rounded-2xl border border-border bg-gradient-card p-6 shadow-soft">
               <h2 className="mb-4 text-lg font-semibold">Your QR code</h2>
               <QRPreview
-                value={publicUrl}
+                value={qrTarget}
                 fgColor={profile.isPro ? profile.qrColor : "#1a1a2e"}
                 bgColor={profile.isPro ? profile.qrBg : "#ffffff"}
                 logoText={profile.isPro ? profile.logoText : ""}

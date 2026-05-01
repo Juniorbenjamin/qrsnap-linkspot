@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { QRPreview } from "@/components/QRPreview";
 import { useProfile, themes, type Theme } from "@/lib/store";
+import { publicProfileUrl } from "@/lib/public-url";
 import { Crown, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/qr")({
@@ -14,7 +15,10 @@ export const Route = createFileRoute("/qr")({
 
 function QRPage() {
   const { profile, update } = useProfile();
-  const publicUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/u/${profile.username}`;
+  // QR codes are printed on flyers, signs, business cards — they need a stable
+  // public URL that survives renames and points at the published deployment.
+  const publicUrl = publicProfileUrl(profile.username);
+  const qrTarget = `${publicUrl}?src=qr`;
   const isPro = profile.isPro;
 
   return (
@@ -31,7 +35,7 @@ function QRPage() {
           <div className="rounded-2xl border border-border bg-gradient-card p-8 shadow-soft">
             <div className="flex justify-center">
               <QRPreview
-                value={publicUrl}
+                value={qrTarget}
                 fgColor={isPro ? profile.qrColor : "#1a1a2e"}
                 bgColor={isPro ? profile.qrBg : "#ffffff"}
                 logoText={isPro ? profile.logoText : ""}

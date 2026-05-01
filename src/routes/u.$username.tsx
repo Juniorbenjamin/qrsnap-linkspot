@@ -5,20 +5,37 @@ import { ExternalLink } from "lucide-react";
 
 export const Route = createFileRoute("/u/$username")({
   component: PublicProfile,
+  // Validate ?src=qr so we know whether this visit came from a QR scan
+  validateSearch: (search: Record<string, unknown>) => ({
+    src: search.src === "qr" ? ("qr" as const) : undefined,
+  }),
   head: () => ({ meta: [{ title: "Profile — QRLinkSpot" }] }),
 });
 
 function PublicProfile() {
   const { username } = useParams({ from: "/u/$username" });
+  const { src } = Route.useSearch();
   const { profile } = useProfile();
   const t = themes[profile.theme];
 
   useEffect(() => {
-    trackEvent({ type: "view" });
-  }, []);
+    // Always count a page view; additionally count a "scan" when arriving via QR.
+    trackEvent({ type: "view", source: src === "qr" ? "qr" : "direct" });
+    if (src === "qr") {
+      trackEvent({ type: "scan", source: "qr" });
+    }
+  }, [src]);
 
   // In a real app we'd fetch by username — here we just show the local profile
   const matches = profile.username === username;
+
+  // Reliably record a click *before* navigating away. We:
+  //  1. write the event synchronously to localStorage (survives navigation)
+  //  2. let the browser follow the href naturally (no preventDefault → respects
+  //     middle-click, cmd-click, "open in new tab", etc.)
+  const handleClick = (linkId: string) => {
+    trackEvent({ type: "click", linkId, source: src === "qr" ? "qr" : "direct" });
+  };
 
   return (
     <div className="min-h-screen w-full" style={{ background: t.bg, color: t.text }}>
@@ -41,7 +58,8 @@ function PublicProfile() {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => trackEvent({ type: "click", linkId: link.id })}
+              onClick={() => handleClick(link.id)}
+              onAuxClick={() => handleClick(link.id)}
               className="group flex items-center justify-between rounded-2xl px-5 py-4 text-base font-semibold transition-all hover:-translate-y-0.5 hover:shadow-elevated"
               style={{ background: t.card, color: t.text, backdropFilter: "blur(10px)" }}
             >

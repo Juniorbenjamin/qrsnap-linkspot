@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { useAnalytics, useProfile } from "@/lib/store";
-import { Eye, MousePointerClick, TrendingUp, Crown, Lock } from "lucide-react";
+import { Eye, MousePointerClick, TrendingUp, Crown, Lock, QrCode } from "lucide-react";
 import { useMemo } from "react";
 
 export const Route = createFileRoute("/analytics")({
@@ -14,8 +14,9 @@ function Analytics() {
   const events = useAnalytics();
   const { profile } = useProfile();
 
-  const { views, clicks, ctr, last7, perLink } = useMemo(() => {
+  const { views, scans, clicks, ctr, last7, perLink } = useMemo(() => {
     const views = events.filter((e) => e.type === "view").length;
+    const scans = events.filter((e) => e.type === "scan").length;
     const clicks = events.filter((e) => e.type === "click").length;
     const ctr = views > 0 ? Math.round((clicks / views) * 100) : 0;
 
@@ -33,7 +34,7 @@ function Analytics() {
       clicks: events.filter((e) => e.type === "click" && e.linkId === l.id).length,
     })).sort((a, b) => b.clicks - a.clicks);
 
-    return { views, clicks, ctr, last7, perLink };
+    return { views, scans, clicks, ctr, last7, perLink };
   }, [events, profile.links]);
 
   const max = Math.max(1, ...last7.flatMap((d) => [d.v, d.c]));
@@ -67,7 +68,8 @@ function Analytics() {
           <p className="mt-1 text-muted-foreground">Track your QR scans and link performance.</p>
         </div>
 
-        <div className="mb-8 grid gap-4 sm:grid-cols-3">
+        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Stat icon={<QrCode className="h-5 w-5" />} label="QR scans" value={scans} />
           <Stat icon={<Eye className="h-5 w-5" />} label="Page views" value={views} />
           <Stat icon={<MousePointerClick className="h-5 w-5" />} label="Link clicks" value={clicks} />
           <Stat icon={<TrendingUp className="h-5 w-5" />} label="Click-through rate" value={`${ctr}%`} />
