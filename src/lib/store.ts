@@ -96,13 +96,21 @@ export function useAuth() {
   };
 }
 
-export type AnalyticsEvent = { type: "view" | "click"; linkId?: string; ts: number };
+export type AnalyticsEvent = {
+  type: "view" | "scan" | "click";
+  linkId?: string;
+  ts: number;
+  source?: "qr" | "direct";
+};
 
 export function getAnalytics(): AnalyticsEvent[] {
   return read<AnalyticsEvent[]>(ANALYTICS_KEY, []);
 }
 
 export function trackEvent(ev: Omit<AnalyticsEvent, "ts">) {
+  // Persist synchronously BEFORE any navigation happens. localStorage.setItem
+  // is synchronous, so the write is committed even if the browser immediately
+  // navigates away (e.g. on a link click).
   const events = getAnalytics();
   events.push({ ...ev, ts: Date.now() });
   write(ANALYTICS_KEY, events);
