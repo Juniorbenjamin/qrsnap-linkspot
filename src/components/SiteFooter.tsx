@@ -12,12 +12,15 @@ export function SiteFooter() {
             </div>
             <span className="font-semibold">QRLinkSpot</span>
           </div>
-          <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">
+          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
             <Link to="/" className="hover:text-foreground">Home</Link>
             <Link to="/pricing" className="hover:text-foreground">Pricing</Link>
             <Link to="/signup" className="hover:text-foreground">Sign up</Link>
+            <Link to="/terms" className="hover:text-foreground">Terms</Link>
+            <Link to="/privacy" className="hover:text-foreground">Privacy</Link>
+            <Link to="/refund-policy" className="hover:text-foreground">Refunds</Link>
           </div>
-          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} QRLinkSpot. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} Junior Rivas. All rights reserved.</p>
         </div>
       </div>
     </footer>
