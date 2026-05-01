@@ -149,14 +149,23 @@ function FreeQRPage() {
             </div>
 
             <div className="rounded-2xl border border-border bg-gradient-card p-8 shadow-soft">
-              <div className="flex justify-center">
+              <div ref={qrWrapRef} className="flex justify-center">
                 <QRPreview
                   value={valid ? trimmed : "https://qrlinkspot.app"}
                   size={280}
-                  showDownload={valid}
+                  showDownload={false}
                 />
               </div>
-              {!valid && (
+              {valid ? (
+                <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
+                  <Button onClick={handleDownload} variant="brand" size="lg" className="sm:min-w-[180px]">
+                    <Download className="mr-2 h-5 w-5" /> Download PNG
+                  </Button>
+                  <Button onClick={handlePrint} variant="outline" size="lg">
+                    <Printer className="mr-2 h-5 w-5" /> Print
+                  </Button>
+                </div>
+              ) : (
                 <p className="mt-6 text-center text-sm text-muted-foreground">
                   Your QR code will appear here once you enter a valid URL.
                 </p>
