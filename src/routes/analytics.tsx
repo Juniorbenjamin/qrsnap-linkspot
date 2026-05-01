@@ -14,8 +14,9 @@ function Analytics() {
   const events = useAnalytics();
   const { profile } = useProfile();
 
-  const { views, clicks, ctr, last7, perLink } = useMemo(() => {
+  const { views, scans, clicks, ctr, last7, perLink } = useMemo(() => {
     const views = events.filter((e) => e.type === "view").length;
+    const scans = events.filter((e) => e.type === "scan").length;
     const clicks = events.filter((e) => e.type === "click").length;
     const ctr = views > 0 ? Math.round((clicks / views) * 100) : 0;
 
@@ -33,7 +34,7 @@ function Analytics() {
       clicks: events.filter((e) => e.type === "click" && e.linkId === l.id).length,
     })).sort((a, b) => b.clicks - a.clicks);
 
-    return { views, clicks, ctr, last7, perLink };
+    return { views, scans, clicks, ctr, last7, perLink };
   }, [events, profile.links]);
 
   const max = Math.max(1, ...last7.flatMap((d) => [d.v, d.c]));
