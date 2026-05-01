@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
-import { useProfile } from "@/lib/store";
+import { useMyProfile } from "@/lib/store";
 import { Check, Crown, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/pricing")({
