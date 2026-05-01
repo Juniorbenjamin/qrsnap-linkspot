@@ -8,11 +8,12 @@ type Props = {
   fgColor?: string;
   bgColor?: string;
   logoText?: string;
+  logoUrl?: string;
   size?: number;
   showDownload?: boolean;
 };
 
-export function QRPreview({ value, fgColor = "#1a1a2e", bgColor = "#ffffff", logoText, size = 240, showDownload = true }: Props) {
+export function QRPreview({ value, fgColor = "#1a1a2e", bgColor = "#ffffff", logoText, logoUrl, size = 240, showDownload = true }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
   const download = () => {
@@ -25,8 +26,14 @@ export function QRPreview({ value, fgColor = "#1a1a2e", bgColor = "#ffffff", log
     a.click();
   };
 
-  const imageSettings = logoText
-    ? undefined
+  // Embed uploaded logo into the QR (level H allows ~30% logo coverage)
+  const imageSettings = logoUrl
+    ? {
+        src: logoUrl,
+        height: Math.round(size * 0.22),
+        width: Math.round(size * 0.22),
+        excavate: true,
+      }
     : undefined;
 
   return (
@@ -45,7 +52,7 @@ export function QRPreview({ value, fgColor = "#1a1a2e", bgColor = "#ffffff", log
           marginSize={2}
           imageSettings={imageSettings}
         />
-        {logoText && (
+        {logoText && !logoUrl && (
           <div
             className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-lg px-2 py-1 text-xs font-bold shadow-soft"
             style={{ background: bgColor, color: fgColor, border: `2px solid ${fgColor}` }}
