@@ -42,7 +42,7 @@ function Dashboard() {
               </Link>
             </Button>
             <Button asChild variant="brand">
-              <Link to="/links/new"><Plus className="mr-2 h-4 w-4" /> Add link</Link>
+              <Link to="/links/$id" params={{ id: "new" }}><Plus className="mr-2 h-4 w-4" /> Add link</Link>
             </Button>
           </div>
         </div>
@@ -86,7 +86,7 @@ function Dashboard() {
               </div>
               {profile.links.length === 0 ? (
                 <div className="py-8 text-center text-sm text-muted-foreground">
-                  No links yet. <Link to="/links/new" className="font-medium text-primary hover:underline">Add your first one</Link>
+                  No links yet. <Link to="/links/$id" params={{ id: "new" }} className="font-medium text-primary hover:underline">Add your first one</Link>
                 </div>
               ) : (
                 <ul className="space-y-2">
