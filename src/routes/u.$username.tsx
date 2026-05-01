@@ -37,11 +37,28 @@ function PublicProfile() {
   const themeKey = (profile?.theme && profile.theme in themes ? profile.theme : "midnight") as keyof typeof themes;
   const t = themes[themeKey];
 
+  // Apply per-profile overrides on top of the theme
+  const bg = profile?.bg_color || t.bg;
+  const buttonBg = profile?.button_color || t.card;
+  const buttonText = profile?.button_text_color || t.text;
+  const textColor = profile?.button_text_color || t.text;
+  const muted = t.muted;
+
+  const buttonStyle = profile?.button_style || "rounded";
+  const buttonRadius =
+    buttonStyle === "pill" ? "9999px" :
+    buttonStyle === "square" ? "6px" :
+    "16px"; // rounded / outline default
+  const isOutline = buttonStyle === "outline";
+
+  const fontWeight = profile?.font_weight || "semibold";
+  const fontWeightClass =
+    fontWeight === "bold" ? "font-bold" :
+    fontWeight === "normal" ? "font-normal" :
+    "font-semibold";
+
   const handleClick = (link: LinkItem) => {
     if (!profile) return;
-    // Synchronous-ish fire; supabase-js queues the request and the browser
-    // will keep it alive long enough on a same-origin POST. We do not await
-    // so navigation isn't delayed.
     trackEvent({
       profile_id: profile.id,
       link_id: link.id,
@@ -51,14 +68,14 @@ function PublicProfile() {
   };
 
   return (
-    <div className="min-h-screen w-full" style={{ background: t.bg, color: t.text }}>
+    <div className="min-h-screen w-full" style={{ background: bg, color: textColor }}>
       <div className="mx-auto flex min-h-screen max-w-md flex-col items-center px-5 py-12">
         {loading ? (
-          <p style={{ color: t.muted }}>Loading…</p>
+          <p style={{ color: muted }}>Loading…</p>
         ) : !profile ? (
           <div className="text-center">
             <p className="text-lg font-semibold">@{username}</p>
-            <p className="mt-2 text-sm" style={{ color: t.muted }}>This profile does not exist yet.</p>
+            <p className="mt-2 text-sm" style={{ color: muted }}>This profile does not exist yet.</p>
           </div>
         ) : (
           <>
@@ -68,9 +85,9 @@ function PublicProfile() {
             >
               {profile.avatar_emoji}
             </div>
-            <h1 className="text-2xl font-bold">{profile.display_name}</h1>
+            <h1 className={`text-2xl ${fontWeight === "normal" ? "font-semibold" : "font-bold"}`}>{profile.display_name}</h1>
             {profile.bio && (
-              <p className="mt-1 text-center text-sm" style={{ color: t.muted }}>{profile.bio}</p>
+              <p className="mt-1 text-center text-sm" style={{ color: muted }}>{profile.bio}</p>
             )}
 
             <div className="mt-8 flex w-full flex-col gap-3">
@@ -82,15 +99,21 @@ function PublicProfile() {
                   rel="noopener noreferrer"
                   onClick={() => handleClick(link)}
                   onAuxClick={() => handleClick(link)}
-                  className="group flex items-center justify-between rounded-2xl px-5 py-4 text-base font-semibold transition-all hover:-translate-y-0.5 hover:shadow-elevated"
-                  style={{ background: t.card, color: t.text, backdropFilter: "blur(10px)" }}
+                  className={`group flex items-center justify-between px-5 py-4 text-base ${fontWeightClass} transition-all hover:-translate-y-0.5 hover:shadow-elevated`}
+                  style={{
+                    background: isOutline ? "transparent" : buttonBg,
+                    color: buttonText,
+                    border: isOutline ? `2px solid ${buttonText}` : "none",
+                    borderRadius: buttonRadius,
+                    backdropFilter: isOutline ? "none" : "blur(10px)",
+                  }}
                 >
                   <span>{link.title}</span>
                   <ExternalLink className="h-4 w-4 opacity-60 transition-opacity group-hover:opacity-100" />
                 </a>
               ))}
               {links.length === 0 && (
-                <p className="text-center text-sm" style={{ color: t.muted }}>No links yet.</p>
+                <p className="text-center text-sm" style={{ color: muted }}>No links yet.</p>
               )}
             </div>
 

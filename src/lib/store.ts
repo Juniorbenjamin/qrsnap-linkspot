@@ -15,6 +15,8 @@ export type LinkItem = {
 };
 
 export type Theme = "midnight" | "sunset" | "ocean" | "forest" | "minimal";
+export type ButtonStyle = "rounded" | "pill" | "square" | "outline";
+export type FontWeight = "normal" | "semibold" | "bold";
 
 export type Profile = {
   id: string;
@@ -27,6 +29,11 @@ export type Profile = {
   qr_bg: string;
   logo_text: string;
   is_pro: boolean;
+  bg_color: string;
+  button_color: string;
+  button_text_color: string;
+  button_style: ButtonStyle;
+  font_weight: FontWeight;
 };
 
 export type AnalyticsEvent = {
