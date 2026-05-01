@@ -14,7 +14,128 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      links: {
+        Row: {
+          created_at: string
+          id: string
+          position: number
+          profile_id: string
+          title: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          position?: number
+          profile_id: string
+          title: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          position?: number
+          profile_id?: string
+          title?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "links_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_emoji: string
+          bio: string
+          created_at: string
+          display_name: string
+          id: string
+          is_pro: boolean
+          logo_text: string
+          qr_bg: string
+          qr_color: string
+          theme: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          avatar_emoji?: string
+          bio?: string
+          created_at?: string
+          display_name?: string
+          id: string
+          is_pro?: boolean
+          logo_text?: string
+          qr_bg?: string
+          qr_color?: string
+          theme?: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          avatar_emoji?: string
+          bio?: string
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_pro?: boolean
+          logo_text?: string
+          qr_bg?: string
+          qr_color?: string
+          theme?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      scan_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          link_id: string | null
+          profile_id: string
+          source: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          link_id?: string | null
+          profile_id: string
+          source?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          link_id?: string | null
+          profile_id?: string
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scan_events_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scan_events_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
