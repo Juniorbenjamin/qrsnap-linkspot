@@ -46,8 +46,8 @@ function Pricing() {
                 "Public link-in-bio page",
               ]}
               cta={
-                profile.isPro ? (
-                  <Button variant="outline" size="lg" className="w-full" onClick={() => update({ isPro: false })}>
+                profile?.is_pro ? (
+                  <Button variant="outline" size="lg" className="w-full" onClick={() => update({ is_pro: false })}>
                     Switch to Free
                   </Button>
                 ) : (
@@ -73,12 +73,12 @@ function Pricing() {
                 "Priority support",
               ]}
               cta={
-                profile.isPro ? (
+                profile?.is_pro ? (
                   <Button variant="hero" size="lg" className="w-full" disabled>
                     <Check className="mr-2 h-4 w-4" /> You're on Pro
                   </Button>
                 ) : (
-                  <Button variant="brand" size="lg" className="w-full" onClick={() => update({ isPro: true })}>
+                  <Button variant="brand" size="lg" className="w-full" onClick={() => update({ is_pro: true })}>
                     <Crown className="mr-2 h-4 w-4" /> Upgrade to Pro
                   </Button>
                 )
