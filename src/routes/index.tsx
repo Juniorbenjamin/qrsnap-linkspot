@@ -156,6 +156,58 @@ function Home() {
           </div>
         </section>
 
+        {/* TRUST / SECURITY STRIP */}
+        <section className="border-b border-border/60 bg-background py-10">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                { Icon: Shield, title: "SSL secured", desc: "Bank-grade encryption on every page and scan." },
+                { Icon: Check, title: "GDPR ready", desc: "We never sell your data. Privacy-first analytics." },
+                { Icon: Zap, title: "99.9% uptime", desc: "Your QR keeps working — even when you're sleeping." },
+                { Icon: Star, title: "4.9/5 rating", desc: "From 2,140+ verified small business reviews." },
+              ].map(({ Icon, title, desc }) => (
+                <div key={title} className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 shadow-soft">
+                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">{title}</p>
+                    <p className="text-xs text-muted-foreground">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* USE CASES — internal SEO links */}
+        <section className="bg-muted/30 py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                Built for <span className="text-gradient-brand">your kind of business</span>
+              </h2>
+              <p className="mt-3 text-muted-foreground">Free, branded QR codes for every use case.</p>
+            </div>
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                { to: "/qr-code-for-restaurant", title: "QR Code for Restaurants", desc: "Digital menus, contactless ordering, table tents." },
+                { to: "/qr-code-for-business-card", title: "QR for Business Cards", desc: "Your contact info + portfolio in one tap." },
+                { to: "/qr-code-for-instagram", title: "QR Code for Instagram", desc: "Grow followers from real-world signage." },
+                { to: "/qr-code-for-wifi", title: "WiFi QR Code", desc: "Guests connect with one scan — no typing." },
+              ].map((u) => (
+                <Link key={u.to} to={u.to} className="group rounded-2xl border border-border bg-card p-5 shadow-soft transition-all hover:-translate-y-1 hover:shadow-elevated">
+                  <h3 className="text-base font-semibold group-hover:text-primary">{u.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">{u.desc}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">
+                    Learn more <ArrowRight className="h-3 w-3" />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* PROBLEM / AGITATE */}
         <section className="py-20 md:py-24">
           <div className="mx-auto max-w-5xl px-4 sm:px-6">

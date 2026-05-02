@@ -12,16 +12,22 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
+import { Route as QrCodeForWifiRouteImport } from './routes/qr-code-for-wifi'
+import { Route as QrCodeForRestaurantRouteImport } from './routes/qr-code-for-restaurant'
+import { Route as QrCodeForInstagramRouteImport } from './routes/qr-code-for-instagram'
+import { Route as QrCodeForBusinessCardRouteImport } from './routes/qr-code-for-business-card'
 import { Route as QrCodeRouteImport } from './routes/qr-code'
 import { Route as QrRouteImport } from './routes/qr'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as LinksIdRouteImport } from './routes/links.$id'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const TermsRoute = TermsRouteImport.update({
@@ -37,6 +43,26 @@ const SignupRoute = SignupRouteImport.update({
 const RefundPolicyRoute = RefundPolicyRouteImport.update({
   id: '/refund-policy',
   path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrCodeForWifiRoute = QrCodeForWifiRouteImport.update({
+  id: '/qr-code-for-wifi',
+  path: '/qr-code-for-wifi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrCodeForRestaurantRoute = QrCodeForRestaurantRouteImport.update({
+  id: '/qr-code-for-restaurant',
+  path: '/qr-code-for-restaurant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrCodeForInstagramRoute = QrCodeForInstagramRouteImport.update({
+  id: '/qr-code-for-instagram',
+  path: '/qr-code-for-instagram',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrCodeForBusinessCardRoute = QrCodeForBusinessCardRouteImport.update({
+  id: '/qr-code-for-business-card',
+  path: '/qr-code-for-business-card',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QrCodeRoute = QrCodeRouteImport.update({
@@ -69,6 +95,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AnalyticsRoute = AnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -89,6 +120,11 @@ const LinksIdRoute = LinksIdRouteImport.update({
   path: '/links/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BlogRoute,
+} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -99,15 +135,21 @@ const ApiPublicPaymentsWebhookRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/blog': typeof BlogRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
   '/qr-code': typeof QrCodeRoute
+  '/qr-code-for-business-card': typeof QrCodeForBusinessCardRoute
+  '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
+  '/qr-code-for-restaurant': typeof QrCodeForRestaurantRoute
+  '/qr-code-for-wifi': typeof QrCodeForWifiRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/links/$id': typeof LinksIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -115,15 +157,21 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/blog': typeof BlogRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
   '/qr-code': typeof QrCodeRoute
+  '/qr-code-for-business-card': typeof QrCodeForBusinessCardRoute
+  '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
+  '/qr-code-for-restaurant': typeof QrCodeForRestaurantRoute
+  '/qr-code-for-wifi': typeof QrCodeForWifiRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/links/$id': typeof LinksIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -132,15 +180,21 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/analytics': typeof AnalyticsRoute
+  '/blog': typeof BlogRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
   '/qr-code': typeof QrCodeRoute
+  '/qr-code-for-business-card': typeof QrCodeForBusinessCardRoute
+  '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
+  '/qr-code-for-restaurant': typeof QrCodeForRestaurantRoute
+  '/qr-code-for-wifi': typeof QrCodeForWifiRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/links/$id': typeof LinksIdRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
@@ -150,15 +204,21 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/analytics'
+    | '/blog'
     | '/dashboard'
     | '/login'
     | '/pricing'
     | '/privacy'
     | '/qr'
     | '/qr-code'
+    | '/qr-code-for-business-card'
+    | '/qr-code-for-instagram'
+    | '/qr-code-for-restaurant'
+    | '/qr-code-for-wifi'
     | '/refund-policy'
     | '/signup'
     | '/terms'
+    | '/blog/$slug'
     | '/links/$id'
     | '/u/$username'
     | '/api/public/payments/webhook'
@@ -166,15 +226,21 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/analytics'
+    | '/blog'
     | '/dashboard'
     | '/login'
     | '/pricing'
     | '/privacy'
     | '/qr'
     | '/qr-code'
+    | '/qr-code-for-business-card'
+    | '/qr-code-for-instagram'
+    | '/qr-code-for-restaurant'
+    | '/qr-code-for-wifi'
     | '/refund-policy'
     | '/signup'
     | '/terms'
+    | '/blog/$slug'
     | '/links/$id'
     | '/u/$username'
     | '/api/public/payments/webhook'
@@ -182,15 +248,21 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/analytics'
+    | '/blog'
     | '/dashboard'
     | '/login'
     | '/pricing'
     | '/privacy'
     | '/qr'
     | '/qr-code'
+    | '/qr-code-for-business-card'
+    | '/qr-code-for-instagram'
+    | '/qr-code-for-restaurant'
+    | '/qr-code-for-wifi'
     | '/refund-policy'
     | '/signup'
     | '/terms'
+    | '/blog/$slug'
     | '/links/$id'
     | '/u/$username'
     | '/api/public/payments/webhook'
@@ -199,12 +271,17 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnalyticsRoute: typeof AnalyticsRoute
+  BlogRoute: typeof BlogRouteWithChildren
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   QrRoute: typeof QrRoute
   QrCodeRoute: typeof QrCodeRoute
+  QrCodeForBusinessCardRoute: typeof QrCodeForBusinessCardRoute
+  QrCodeForInstagramRoute: typeof QrCodeForInstagramRoute
+  QrCodeForRestaurantRoute: typeof QrCodeForRestaurantRoute
+  QrCodeForWifiRoute: typeof QrCodeForWifiRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
@@ -234,6 +311,34 @@ declare module '@tanstack/react-router' {
       path: '/refund-policy'
       fullPath: '/refund-policy'
       preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-code-for-wifi': {
+      id: '/qr-code-for-wifi'
+      path: '/qr-code-for-wifi'
+      fullPath: '/qr-code-for-wifi'
+      preLoaderRoute: typeof QrCodeForWifiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-code-for-restaurant': {
+      id: '/qr-code-for-restaurant'
+      path: '/qr-code-for-restaurant'
+      fullPath: '/qr-code-for-restaurant'
+      preLoaderRoute: typeof QrCodeForRestaurantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-code-for-instagram': {
+      id: '/qr-code-for-instagram'
+      path: '/qr-code-for-instagram'
+      fullPath: '/qr-code-for-instagram'
+      preLoaderRoute: typeof QrCodeForInstagramRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-code-for-business-card': {
+      id: '/qr-code-for-business-card'
+      path: '/qr-code-for-business-card'
+      fullPath: '/qr-code-for-business-card'
+      preLoaderRoute: typeof QrCodeForBusinessCardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/qr-code': {
@@ -278,6 +383,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/analytics': {
       id: '/analytics'
       path: '/analytics'
@@ -306,6 +418,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LinksIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof BlogRoute
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -316,15 +435,30 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface BlogRouteChildren {
+  BlogSlugRoute: typeof BlogSlugRoute
+}
+
+const BlogRouteChildren: BlogRouteChildren = {
+  BlogSlugRoute: BlogSlugRoute,
+}
+
+const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnalyticsRoute: AnalyticsRoute,
+  BlogRoute: BlogRouteWithChildren,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   QrRoute: QrRoute,
   QrCodeRoute: QrCodeRoute,
+  QrCodeForBusinessCardRoute: QrCodeForBusinessCardRoute,
+  QrCodeForInstagramRoute: QrCodeForInstagramRoute,
+  QrCodeForRestaurantRoute: QrCodeForRestaurantRoute,
+  QrCodeForWifiRoute: QrCodeForWifiRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
