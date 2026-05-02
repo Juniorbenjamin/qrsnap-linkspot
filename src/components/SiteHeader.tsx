@@ -35,6 +35,7 @@ export function SiteHeader() {
           {navItem("/", "Home")}
           {navItem("/qr-code", "Free QR")}
           {navItem("/pricing", "Pricing")}
+          {navItem("/blog", "Blog")}
           {user && navItem("/dashboard", "Dashboard")}
           {user && navItem("/analytics", "Analytics")}
         </nav>
@@ -72,6 +73,7 @@ export function SiteHeader() {
             {navItem("/", "Home")}
             {navItem("/qr-code", "Free QR")}
             {navItem("/pricing", "Pricing")}
+            {navItem("/blog", "Blog")}
             {user && navItem("/dashboard", "Dashboard")}
             {user && navItem("/analytics", "Analytics")}
             <div className="flex gap-2 pt-2">
