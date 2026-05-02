@@ -12,6 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
+import { Route as QrCodeForWifiRouteImport } from './routes/qr-code-for-wifi'
+import { Route as QrCodeForRestaurantRouteImport } from './routes/qr-code-for-restaurant'
+import { Route as QrCodeForInstagramRouteImport } from './routes/qr-code-for-instagram'
+import { Route as QrCodeForBusinessCardRouteImport } from './routes/qr-code-for-business-card'
 import { Route as QrCodeRouteImport } from './routes/qr-code'
 import { Route as QrRouteImport } from './routes/qr'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -37,6 +41,26 @@ const SignupRoute = SignupRouteImport.update({
 const RefundPolicyRoute = RefundPolicyRouteImport.update({
   id: '/refund-policy',
   path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrCodeForWifiRoute = QrCodeForWifiRouteImport.update({
+  id: '/qr-code-for-wifi',
+  path: '/qr-code-for-wifi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrCodeForRestaurantRoute = QrCodeForRestaurantRouteImport.update({
+  id: '/qr-code-for-restaurant',
+  path: '/qr-code-for-restaurant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrCodeForInstagramRoute = QrCodeForInstagramRouteImport.update({
+  id: '/qr-code-for-instagram',
+  path: '/qr-code-for-instagram',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrCodeForBusinessCardRoute = QrCodeForBusinessCardRouteImport.update({
+  id: '/qr-code-for-business-card',
+  path: '/qr-code-for-business-card',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QrCodeRoute = QrCodeRouteImport.update({
@@ -105,6 +129,10 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
   '/qr-code': typeof QrCodeRoute
+  '/qr-code-for-business-card': typeof QrCodeForBusinessCardRoute
+  '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
+  '/qr-code-for-restaurant': typeof QrCodeForRestaurantRoute
+  '/qr-code-for-wifi': typeof QrCodeForWifiRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
@@ -121,6 +149,10 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
   '/qr-code': typeof QrCodeRoute
+  '/qr-code-for-business-card': typeof QrCodeForBusinessCardRoute
+  '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
+  '/qr-code-for-restaurant': typeof QrCodeForRestaurantRoute
+  '/qr-code-for-wifi': typeof QrCodeForWifiRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
@@ -138,6 +170,10 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
   '/qr-code': typeof QrCodeRoute
+  '/qr-code-for-business-card': typeof QrCodeForBusinessCardRoute
+  '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
+  '/qr-code-for-restaurant': typeof QrCodeForRestaurantRoute
+  '/qr-code-for-wifi': typeof QrCodeForWifiRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
@@ -156,6 +192,10 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/qr'
     | '/qr-code'
+    | '/qr-code-for-business-card'
+    | '/qr-code-for-instagram'
+    | '/qr-code-for-restaurant'
+    | '/qr-code-for-wifi'
     | '/refund-policy'
     | '/signup'
     | '/terms'
@@ -172,6 +212,10 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/qr'
     | '/qr-code'
+    | '/qr-code-for-business-card'
+    | '/qr-code-for-instagram'
+    | '/qr-code-for-restaurant'
+    | '/qr-code-for-wifi'
     | '/refund-policy'
     | '/signup'
     | '/terms'
@@ -188,6 +232,10 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/qr'
     | '/qr-code'
+    | '/qr-code-for-business-card'
+    | '/qr-code-for-instagram'
+    | '/qr-code-for-restaurant'
+    | '/qr-code-for-wifi'
     | '/refund-policy'
     | '/signup'
     | '/terms'
@@ -205,6 +253,10 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   QrRoute: typeof QrRoute
   QrCodeRoute: typeof QrCodeRoute
+  QrCodeForBusinessCardRoute: typeof QrCodeForBusinessCardRoute
+  QrCodeForInstagramRoute: typeof QrCodeForInstagramRoute
+  QrCodeForRestaurantRoute: typeof QrCodeForRestaurantRoute
+  QrCodeForWifiRoute: typeof QrCodeForWifiRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
@@ -234,6 +286,34 @@ declare module '@tanstack/react-router' {
       path: '/refund-policy'
       fullPath: '/refund-policy'
       preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-code-for-wifi': {
+      id: '/qr-code-for-wifi'
+      path: '/qr-code-for-wifi'
+      fullPath: '/qr-code-for-wifi'
+      preLoaderRoute: typeof QrCodeForWifiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-code-for-restaurant': {
+      id: '/qr-code-for-restaurant'
+      path: '/qr-code-for-restaurant'
+      fullPath: '/qr-code-for-restaurant'
+      preLoaderRoute: typeof QrCodeForRestaurantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-code-for-instagram': {
+      id: '/qr-code-for-instagram'
+      path: '/qr-code-for-instagram'
+      fullPath: '/qr-code-for-instagram'
+      preLoaderRoute: typeof QrCodeForInstagramRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-code-for-business-card': {
+      id: '/qr-code-for-business-card'
+      path: '/qr-code-for-business-card'
+      fullPath: '/qr-code-for-business-card'
+      preLoaderRoute: typeof QrCodeForBusinessCardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/qr-code': {
@@ -325,6 +405,10 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   QrRoute: QrRoute,
   QrCodeRoute: QrCodeRoute,
+  QrCodeForBusinessCardRoute: QrCodeForBusinessCardRoute,
+  QrCodeForInstagramRoute: QrCodeForInstagramRoute,
+  QrCodeForRestaurantRoute: QrCodeForRestaurantRoute,
+  QrCodeForWifiRoute: QrCodeForWifiRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
