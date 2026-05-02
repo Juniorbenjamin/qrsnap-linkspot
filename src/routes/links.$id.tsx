@@ -54,7 +54,7 @@ function EditLink() {
       if (isNew) await add(title, url);
       else await update(id, { title, url });
       toast.success(isNew ? "Link added" : "Link updated");
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/dashboard", search: {} });
     } catch {
       toast.error("Save failed");
     } finally { setSubmitting(false); }
@@ -64,7 +64,7 @@ function EditLink() {
     <div className="min-h-screen bg-background">
       <SiteHeader />
       <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
-        <Link to="/dashboard" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+        <Link to="/dashboard" search={{}} className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-4 w-4" /> Back to dashboard
         </Link>
         <h1 className="text-3xl font-bold tracking-tight">{isNew ? "Add a new link" : "Edit link"}</h1>
@@ -92,7 +92,7 @@ function EditLink() {
               <Button type="submit" variant="brand" size="lg" className="flex-1" disabled={submitting}>
                 <Save className="mr-2 h-4 w-4" /> {submitting ? "Saving…" : "Save link"}
               </Button>
-              <Button type="button" variant="outline" size="lg" onClick={() => navigate({ to: "/dashboard" })}>Cancel</Button>
+              <Button type="button" variant="outline" size="lg" onClick={() => navigate({ to: "/dashboard", search: {} })}>Cancel</Button>
             </div>
           </form>
         )}

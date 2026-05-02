@@ -26,7 +26,7 @@ function Login() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/dashboard", search: {} });
   };
 
   const google = async () => {
@@ -35,7 +35,7 @@ function Login() {
     });
     if (result.error) { toast.error("Google sign-in failed"); return; }
     if (result.redirected) return;
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/dashboard", search: {} });
   };
 
   return (

@@ -31,7 +31,7 @@ function SignUp() {
     setSubmitting(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Account created");
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/dashboard", search: {} });
   };
 
   const google = async () => {
@@ -40,7 +40,7 @@ function SignUp() {
     });
     if (result.error) { toast.error("Google sign-in failed"); return; }
     if (result.redirected) return;
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/dashboard", search: {} });
   };
 
   return (
