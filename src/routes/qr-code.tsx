@@ -578,3 +578,37 @@ function loadImg(src: string): Promise<HTMLImageElement> {
     img.src = src;
   });
 }
+
+function DotShapePreview({ style, color }: { style: DotStyle; color: string }) {
+  // 3x3 grid demo of the module shape
+  const cells = Array.from({ length: 9 }, (_, i) => i);
+  const shape = (i: number) => {
+    const common = "h-2 w-2";
+    if (style === "dots") return <span key={i} className={`${common} rounded-full`} style={{ background: color }} />;
+    if (style === "rounded") return <span key={i} className={`${common} rounded-[3px]`} style={{ background: color }} />;
+    if (style === "diamond")
+      return <span key={i} className={`${common} rotate-45`} style={{ background: color }} />;
+    if (style === "classy")
+      return <span key={i} className={`${common} rounded-tl-[5px] rounded-br-[5px]`} style={{ background: color }} />;
+    return <span key={i} className={common} style={{ background: color }} />;
+  };
+  return (
+    <span className="grid grid-cols-3 gap-[2px]">
+      {cells.map((i) => shape(i))}
+    </span>
+  );
+}
+
+function EyeShapePreview({ style, color }: { style: EyeStyle; color: string }) {
+  const radius =
+    style === "circle" ? "9999px" : style === "rounded" ? "8px" : style === "leaf" ? "12px 0 12px 0" : "0";
+  return (
+    <span
+      className="flex h-7 w-7 items-center justify-center"
+      style={{ border: `3px solid ${color}`, borderRadius: radius }}
+    >
+      <span className="h-2.5 w-2.5" style={{ background: color, borderRadius: radius }} />
+    </span>
+  );
+}
+
