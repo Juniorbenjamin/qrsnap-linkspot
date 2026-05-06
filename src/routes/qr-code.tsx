@@ -412,15 +412,18 @@ function FreeQRPage() {
               >
                 <DesignFrame preset={preset} caption={caption}>
                   <div ref={qrWrapRef}>
-                    <QRPreview
+                    <StyledQR
                       value={valid ? trimmed : "https://qrlinkspot.app"}
                       size={260}
                       fgColor={preset.fg}
                       bgColor={preset.bg}
+                      gradient={useGradient && preset.gradient ? preset.gradient : null}
+                      dotStyle={dotStyle}
+                      eyeStyle={eyeStyle}
+                      eyeColor={preset.accent || preset.fg}
                       logoUrl={logoUrl ?? undefined}
-                      logoSizeRatio={logoUrl ? logoSize : undefined}
+                      logoSizeRatio={logoSize}
                       logoPadding={logoPad}
-                      showDownload={false}
                     />
                   </div>
                 </DesignFrame>
