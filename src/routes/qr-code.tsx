@@ -398,6 +398,9 @@ function FreeQRPage() {
                       size={260}
                       fgColor={preset.fg}
                       bgColor={preset.bg}
+                      logoUrl={logoUrl ?? undefined}
+                      logoSizeRatio={logoUrl ? logoSize : undefined}
+                      logoPadding={logoPad}
                       showDownload={false}
                     />
                   </div>
