@@ -73,12 +73,30 @@ function FreeQRPage() {
   const [url, setUrl] = useState("");
   const [preset, setPreset] = useState<Preset>(PRESETS[0]);
   const [caption, setCaption] = useState("SCAN ME");
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoSize, setLogoSize] = useState<number>(0.20); // 0.08 - 0.30
+  const [logoPad, setLogoPad] = useState<number>(8); // px in preview
   const trimmed = url.trim();
   const valid = isValidUrl(trimmed);
   const qrWrapRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getCanvas = () =>
     qrWrapRef.current?.querySelector("canvas") as HTMLCanvasElement | null;
+
+  const handleLogoUpload = (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Logo must be under 2MB");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setLogoUrl(reader.result as string);
+    reader.readAsDataURL(file);
+  };
 
   const renderDesignToCanvas = (): HTMLCanvasElement | null => {
     const src = getCanvas();
