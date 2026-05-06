@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { QRPreview } from "@/components/QRPreview";
+import { StyledQR, type DotStyle, type EyeStyle } from "@/components/StyledQR";
 import { ArrowRight, Download, Printer, Sparkles, Upload, X } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
