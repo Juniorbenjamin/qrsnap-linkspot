@@ -90,8 +90,11 @@ function FreeQRPage() {
   const [preset, setPreset] = useState<Preset>(PRESETS[0]);
   const [caption, setCaption] = useState("SCAN ME");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [logoSize, setLogoSize] = useState<number>(0.20); // 0.08 - 0.30
-  const [logoPad, setLogoPad] = useState<number>(8); // px in preview
+  const [logoSize, setLogoSize] = useState<number>(0.20);
+  const [logoPad, setLogoPad] = useState<number>(8);
+  const [dotStyle, setDotStyle] = useState<DotStyle>("rounded");
+  const [eyeStyle, setEyeStyle] = useState<EyeStyle>("rounded");
+  const [useGradient, setUseGradient] = useState<boolean>(true);
   const trimmed = url.trim();
   const valid = isValidUrl(trimmed);
   const qrWrapRef = useRef<HTMLDivElement>(null);
