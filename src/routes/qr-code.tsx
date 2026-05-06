@@ -324,6 +324,61 @@ function FreeQRPage() {
                 </div>
               </div>
 
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label className="text-base font-semibold">Dot shape</Label>
+                  <div className="mt-2 grid grid-cols-5 gap-1.5">
+                    {DOT_STYLES.map((d) => {
+                      const active = dotStyle === d.id;
+                      return (
+                        <button
+                          key={d.id}
+                          type="button"
+                          onClick={() => setDotStyle(d.id)}
+                          className={`flex flex-col items-center gap-1 rounded-lg border p-1.5 text-[10px] transition ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-foreground/30"}`}
+                          aria-label={d.name}
+                        >
+                          <DotShapePreview style={d.id} color={preset.fg} />
+                          <span className="font-medium text-muted-foreground">{d.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-base font-semibold">Eye shape</Label>
+                  <div className="mt-2 grid grid-cols-4 gap-1.5">
+                    {EYE_STYLES.map((e) => {
+                      const active = eyeStyle === e.id;
+                      return (
+                        <button
+                          key={e.id}
+                          type="button"
+                          onClick={() => setEyeStyle(e.id)}
+                          className={`flex flex-col items-center gap-1 rounded-lg border p-1.5 text-[10px] transition ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-foreground/30"}`}
+                          aria-label={e.name}
+                        >
+                          <EyeShapePreview style={e.id} color={preset.accent || preset.fg} />
+                          <span className="font-medium text-muted-foreground">{e.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {preset.gradient && (
+                <label className="mt-4 flex cursor-pointer items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={useGradient}
+                    onChange={(e) => setUseGradient(e.target.checked)}
+                    className="h-4 w-4 rounded border-border"
+                  />
+                  Use gradient fill
+                </label>
+              )}
+
               <div className="mt-6">
                 <Label htmlFor="caption" className="text-base font-semibold">Caption</Label>
                 <p className="mt-1 text-sm text-muted-foreground">Short text below the QR (or leave empty).</p>
