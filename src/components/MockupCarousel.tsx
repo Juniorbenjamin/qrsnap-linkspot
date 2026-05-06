@@ -4,6 +4,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import mockupHero from "@/assets/mockup-qr-generator.png";
 
 type Slide = {
   id: string;
@@ -15,21 +16,27 @@ type Slide = {
 const FALLBACK_SLIDES: Slide[] = [
   {
     id: "f1",
-    title: "Your link-in-bio, beautifully branded",
-    description: "Match your colors, fonts and logo in seconds.",
-    image_url: "",
+    title: "Welcome screen",
+    description: "Create beautiful QR codes in seconds — no account required.",
+    image_url: mockupHero,
   },
   {
     id: "f2",
-    title: "Custom QR codes that convert",
-    description: "Add your logo. Track every scan in real time.",
-    image_url: "",
+    title: "Generate any QR",
+    description: "URL, Text, Wi-Fi, vCard, Email, SMS, WhatsApp and more.",
+    image_url: mockupHero,
   },
   {
     id: "f3",
-    title: "Real-time analytics",
-    description: "See which links your audience actually taps.",
-    image_url: "",
+    title: "Customize your style",
+    description: "Pick designs, colors, logo, eyes and frames to match your brand.",
+    image_url: mockupHero,
+  },
+  {
+    id: "f4",
+    title: "Track every scan",
+    description: "Live analytics, share, download and print — all in one place.",
+    image_url: mockupHero,
   },
 ];
 
