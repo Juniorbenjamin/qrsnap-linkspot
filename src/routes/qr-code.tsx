@@ -98,7 +98,7 @@ function FreeQRPage() {
     reader.readAsDataURL(file);
   };
 
-  const renderDesignToCanvas = (): HTMLCanvasElement | null => {
+  const renderDesignToCanvas = async (): Promise<HTMLCanvasElement | null> => {
     const src = getCanvas();
     if (!src) return null;
     const PAD = 80;
