@@ -56,17 +56,33 @@ type Preset = {
   bg: string;
   frame: "none" | "scan" | "rounded" | "dotted";
   accent?: string;
+  gradient?: { from: string; to: string; angle?: number };
 };
 
 const PRESETS: Preset[] = [
   { id: "midnight", name: "Midnight", fg: "#0F172A", bg: "#FFFFFF", frame: "rounded" },
-  { id: "ocean", name: "Ocean", fg: "#0E7490", bg: "#ECFEFF", frame: "scan", accent: "#0E7490" },
-  { id: "sunset", name: "Sunset", fg: "#9A3412", bg: "#FFF7ED", frame: "scan", accent: "#EA580C" },
+  { id: "ocean", name: "Ocean", fg: "#0E7490", bg: "#ECFEFF", frame: "scan", accent: "#0E7490", gradient: { from: "#0EA5E9", to: "#0E7490", angle: 135 } },
+  { id: "sunset", name: "Sunset", fg: "#9A3412", bg: "#FFF7ED", frame: "scan", accent: "#EA580C", gradient: { from: "#F59E0B", to: "#DC2626", angle: 135 } },
   { id: "forest", name: "Forest", fg: "#14532D", bg: "#F0FDF4", frame: "rounded" },
-  { id: "berry", name: "Berry", fg: "#581C87", bg: "#FAF5FF", frame: "dotted", accent: "#7E22CE" },
-  { id: "rose", name: "Rose", fg: "#9F1239", bg: "#FFF1F2", frame: "scan", accent: "#E11D48" },
+  { id: "berry", name: "Berry", fg: "#581C87", bg: "#FAF5FF", frame: "dotted", accent: "#7E22CE", gradient: { from: "#A855F7", to: "#581C87", angle: 135 } },
+  { id: "rose", name: "Rose", fg: "#9F1239", bg: "#FFF1F2", frame: "scan", accent: "#E11D48", gradient: { from: "#FB7185", to: "#9F1239", angle: 135 } },
   { id: "mono", name: "Mono", fg: "#000000", bg: "#FFFFFF", frame: "none" },
   { id: "ink", name: "Ink", fg: "#1E293B", bg: "#F8FAFC", frame: "dotted", accent: "#334155" },
+];
+
+const DOT_STYLES: { id: DotStyle; name: string }[] = [
+  { id: "square", name: "Square" },
+  { id: "rounded", name: "Rounded" },
+  { id: "dots", name: "Dots" },
+  { id: "classy", name: "Classy" },
+  { id: "diamond", name: "Diamond" },
+];
+
+const EYE_STYLES: { id: EyeStyle; name: string }[] = [
+  { id: "square", name: "Square" },
+  { id: "rounded", name: "Rounded" },
+  { id: "circle", name: "Circle" },
+  { id: "leaf", name: "Leaf" },
 ];
 
 function FreeQRPage() {
