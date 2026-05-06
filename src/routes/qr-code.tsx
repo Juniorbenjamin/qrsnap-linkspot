@@ -317,6 +317,61 @@ function FreeQRPage() {
                 />
               </div>
 
+              <div className="mt-6">
+                <Label className="text-base font-semibold">Logo</Label>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Upload your logo to embed it in the center. PNG with transparent background works best.
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleLogoUpload(f);
+                    e.target.value = "";
+                  }}
+                />
+                {!logoUrl ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mt-3"
+                  >
+                    <Upload className="mr-2 h-4 w-4" /> Upload logo
+                  </Button>
+                ) : (
+                  <div className="mt-3 space-y-4">
+                    <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/40 p-3">
+                      <img src={logoUrl} alt="Logo preview" className="h-12 w-12 rounded-md object-contain bg-white" />
+                      <div className="flex-1 text-sm text-muted-foreground">Logo embedded in QR</div>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()}>Replace</Button>
+                      <Button type="button" variant="ghost" size="icon" onClick={() => setLogoUrl(null)} aria-label="Remove logo">
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div>
+                      <div className="mb-2 flex items-center justify-between">
+                        <Label className="text-sm font-medium">Logo size</Label>
+                        <span className="text-xs text-muted-foreground">{Math.round(logoSize * 100)}%</span>
+                      </div>
+                      <Slider value={[logoSize * 100]} min={8} max={30} step={1} onValueChange={(v) => setLogoSize(v[0] / 100)} />
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        Larger logos can break scanability — test before printing.
+                      </p>
+                    </div>
+                    <div>
+                      <div className="mb-2 flex items-center justify-between">
+                        <Label className="text-sm font-medium">Logo padding</Label>
+                        <span className="text-xs text-muted-foreground">{logoPad}px</span>
+                      </div>
+                      <Slider value={[logoPad]} min={0} max={24} step={1} onValueChange={(v) => setLogoPad(v[0])} />
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="mt-6 rounded-xl border border-primary/30 bg-primary/5 p-4">
                 <p className="text-sm font-medium">Want more?</p>
                 <p className="mt-1 text-sm text-muted-foreground">
