@@ -13,6 +13,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as QrCodeForWifiRouteImport } from './routes/qr-code-for-wifi'
+import { Route as QrCodeForSmallBusinessRouteImport } from './routes/qr-code-for-small-business'
 import { Route as QrCodeForRestaurantRouteImport } from './routes/qr-code-for-restaurant'
 import { Route as QrCodeForRealEstateRouteImport } from './routes/qr-code-for-real-estate'
 import { Route as QrCodeForInstagramRouteImport } from './routes/qr-code-for-instagram'
@@ -53,6 +54,11 @@ const RefundPolicyRoute = RefundPolicyRouteImport.update({
 const QrCodeForWifiRoute = QrCodeForWifiRouteImport.update({
   id: '/qr-code-for-wifi',
   path: '/qr-code-for-wifi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrCodeForSmallBusinessRoute = QrCodeForSmallBusinessRouteImport.update({
+  id: '/qr-code-for-small-business',
+  path: '/qr-code-for-small-business',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QrCodeForRestaurantRoute = QrCodeForRestaurantRouteImport.update({
@@ -179,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
   '/qr-code-for-real-estate': typeof QrCodeForRealEstateRoute
   '/qr-code-for-restaurant': typeof QrCodeForRestaurantRoute
+  '/qr-code-for-small-business': typeof QrCodeForSmallBusinessRoute
   '/qr-code-for-wifi': typeof QrCodeForWifiRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
@@ -206,6 +213,7 @@ export interface FileRoutesByTo {
   '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
   '/qr-code-for-real-estate': typeof QrCodeForRealEstateRoute
   '/qr-code-for-restaurant': typeof QrCodeForRestaurantRoute
+  '/qr-code-for-small-business': typeof QrCodeForSmallBusinessRoute
   '/qr-code-for-wifi': typeof QrCodeForWifiRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
@@ -234,6 +242,7 @@ export interface FileRoutesById {
   '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
   '/qr-code-for-real-estate': typeof QrCodeForRealEstateRoute
   '/qr-code-for-restaurant': typeof QrCodeForRestaurantRoute
+  '/qr-code-for-small-business': typeof QrCodeForSmallBusinessRoute
   '/qr-code-for-wifi': typeof QrCodeForWifiRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
@@ -263,6 +272,7 @@ export interface FileRouteTypes {
     | '/qr-code-for-instagram'
     | '/qr-code-for-real-estate'
     | '/qr-code-for-restaurant'
+    | '/qr-code-for-small-business'
     | '/qr-code-for-wifi'
     | '/refund-policy'
     | '/signup'
@@ -290,6 +300,7 @@ export interface FileRouteTypes {
     | '/qr-code-for-instagram'
     | '/qr-code-for-real-estate'
     | '/qr-code-for-restaurant'
+    | '/qr-code-for-small-business'
     | '/qr-code-for-wifi'
     | '/refund-policy'
     | '/signup'
@@ -317,6 +328,7 @@ export interface FileRouteTypes {
     | '/qr-code-for-instagram'
     | '/qr-code-for-real-estate'
     | '/qr-code-for-restaurant'
+    | '/qr-code-for-small-business'
     | '/qr-code-for-wifi'
     | '/refund-policy'
     | '/signup'
@@ -345,6 +357,7 @@ export interface RootRouteChildren {
   QrCodeForInstagramRoute: typeof QrCodeForInstagramRoute
   QrCodeForRealEstateRoute: typeof QrCodeForRealEstateRoute
   QrCodeForRestaurantRoute: typeof QrCodeForRestaurantRoute
+  QrCodeForSmallBusinessRoute: typeof QrCodeForSmallBusinessRoute
   QrCodeForWifiRoute: typeof QrCodeForWifiRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   SignupRoute: typeof SignupRoute
@@ -383,6 +396,13 @@ declare module '@tanstack/react-router' {
       path: '/qr-code-for-wifi'
       fullPath: '/qr-code-for-wifi'
       preLoaderRoute: typeof QrCodeForWifiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-code-for-small-business': {
+      id: '/qr-code-for-small-business'
+      path: '/qr-code-for-small-business'
+      fullPath: '/qr-code-for-small-business'
+      preLoaderRoute: typeof QrCodeForSmallBusinessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/qr-code-for-restaurant': {
@@ -562,6 +582,7 @@ const rootRouteChildren: RootRouteChildren = {
   QrCodeForInstagramRoute: QrCodeForInstagramRoute,
   QrCodeForRealEstateRoute: QrCodeForRealEstateRoute,
   QrCodeForRestaurantRoute: QrCodeForRestaurantRoute,
+  QrCodeForSmallBusinessRoute: QrCodeForSmallBusinessRoute,
   QrCodeForWifiRoute: QrCodeForWifiRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   SignupRoute: SignupRoute,
