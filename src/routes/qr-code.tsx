@@ -124,8 +124,6 @@ function FreeQRPage() {
     const PAD = Math.round(80 * scale);
     const HEADER = preset.frame !== "none" ? Math.round(70 * scale) : 0;
     const FOOTER = preset.frame !== "none" && caption ? Math.round(90 * scale) : 0;
-    const HEADER = preset.frame !== "none" ? 70 : 0;
-    const FOOTER = preset.frame !== "none" && caption ? 90 : 0;
     const w = src.width + PAD * 2;
     const h = src.height + PAD * 2 + HEADER + FOOTER;
     const out = document.createElement("canvas");
