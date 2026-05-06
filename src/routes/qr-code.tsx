@@ -120,7 +120,10 @@ function FreeQRPage() {
   const renderDesignToCanvas = async (): Promise<HTMLCanvasElement | null> => {
     const src = getCanvas();
     if (!src) return null;
-    const PAD = 80;
+    const scale = src.width / 260; // normalize to design size 260
+    const PAD = Math.round(80 * scale);
+    const HEADER = preset.frame !== "none" ? Math.round(70 * scale) : 0;
+    const FOOTER = preset.frame !== "none" && caption ? Math.round(90 * scale) : 0;
     const HEADER = preset.frame !== "none" ? 70 : 0;
     const FOOTER = preset.frame !== "none" && caption ? 90 : 0;
     const w = src.width + PAD * 2;
