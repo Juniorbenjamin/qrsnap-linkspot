@@ -161,6 +161,29 @@ function FreeQRPage() {
 
     ctx.drawImage(src, PAD, PAD + HEADER);
 
+    // Draw padding ring + crisp logo on top of the embedded logo for cleaner output
+    if (logoUrl) {
+      const qrSize = src.width;
+      const logoPx = Math.round(qrSize * logoSize);
+      const ringPx = logoPx + logoPad * 2;
+      const cx = PAD + qrSize / 2;
+      const cy = PAD + HEADER + qrSize / 2;
+      ctx.fillStyle = preset.bg;
+      const rx = cx - ringPx / 2;
+      const ry = cy - ringPx / 2;
+      roundRect(ctx, rx, ry, ringPx, ringPx, 12);
+      ctx.fill();
+      try {
+        const img = new Image();
+        img.src = logoUrl;
+        if (img.complete && img.naturalWidth > 0) {
+          ctx.drawImage(img, cx - logoPx / 2, cy - logoPx / 2, logoPx, logoPx);
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
     if (FOOTER > 0 && caption) {
       const cy = PAD + HEADER + src.height + FOOTER / 2 + 4;
       ctx.fillStyle = accent;
