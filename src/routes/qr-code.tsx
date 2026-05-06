@@ -48,8 +48,30 @@ function isValidUrl(value: string) {
   }
 }
 
+type Preset = {
+  id: string;
+  name: string;
+  fg: string;
+  bg: string;
+  frame: "none" | "scan" | "rounded" | "dotted";
+  accent?: string;
+};
+
+const PRESETS: Preset[] = [
+  { id: "midnight", name: "Midnight", fg: "#0F172A", bg: "#FFFFFF", frame: "rounded" },
+  { id: "ocean", name: "Ocean", fg: "#0E7490", bg: "#ECFEFF", frame: "scan", accent: "#0E7490" },
+  { id: "sunset", name: "Sunset", fg: "#9A3412", bg: "#FFF7ED", frame: "scan", accent: "#EA580C" },
+  { id: "forest", name: "Forest", fg: "#14532D", bg: "#F0FDF4", frame: "rounded" },
+  { id: "berry", name: "Berry", fg: "#581C87", bg: "#FAF5FF", frame: "dotted", accent: "#7E22CE" },
+  { id: "rose", name: "Rose", fg: "#9F1239", bg: "#FFF1F2", frame: "scan", accent: "#E11D48" },
+  { id: "mono", name: "Mono", fg: "#000000", bg: "#FFFFFF", frame: "none" },
+  { id: "ink", name: "Ink", fg: "#1E293B", bg: "#F8FAFC", frame: "dotted", accent: "#334155" },
+];
+
 function FreeQRPage() {
   const [url, setUrl] = useState("");
+  const [preset, setPreset] = useState<Preset>(PRESETS[0]);
+  const [caption, setCaption] = useState("SCAN ME");
   const trimmed = url.trim();
   const valid = isValidUrl(trimmed);
   const qrWrapRef = useRef<HTMLDivElement>(null);
@@ -57,11 +79,86 @@ function FreeQRPage() {
   const getCanvas = () =>
     qrWrapRef.current?.querySelector("canvas") as HTMLCanvasElement | null;
 
+  const renderDesignToCanvas = (): HTMLCanvasElement | null => {
+    const src = getCanvas();
+    if (!src) return null;
+    const PAD = 80;
+    const HEADER = preset.frame !== "none" ? 70 : 0;
+    const FOOTER = preset.frame !== "none" && caption ? 90 : 0;
+    const w = src.width + PAD * 2;
+    const h = src.height + PAD * 2 + HEADER + FOOTER;
+    const out = document.createElement("canvas");
+    out.width = w;
+    out.height = h;
+    const ctx = out.getContext("2d");
+    if (!ctx) return null;
+
+    ctx.fillStyle = preset.bg;
+    roundRect(ctx, 0, 0, w, h, 48);
+    ctx.fill();
+
+    const accent = preset.accent || preset.fg;
+    if (preset.frame === "rounded") {
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 8;
+      roundRect(ctx, 16, 16, w - 32, h - 32, 36);
+      ctx.stroke();
+    } else if (preset.frame === "dotted") {
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 6;
+      ctx.setLineDash([2, 14]);
+      ctx.lineCap = "round";
+      roundRect(ctx, 20, 20, w - 40, h - 40, 32);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    } else if (preset.frame === "scan") {
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 10;
+      ctx.lineCap = "round";
+      const L = 60;
+      const m = 24;
+      const corners: Array<[number, number, number, number]> = [
+        [m, m, 1, 1],
+        [w - m, m, -1, 1],
+        [m, h - m, 1, -1],
+        [w - m, h - m, -1, -1],
+      ];
+      corners.forEach(([x, y, dx, dy]) => {
+        ctx.beginPath();
+        ctx.moveTo(x, y + dy * L);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x + dx * L, y);
+        ctx.stroke();
+      });
+    }
+
+    if (HEADER > 0) {
+      ctx.fillStyle = preset.fg;
+      ctx.font = "600 26px ui-sans-serif, system-ui, -apple-system";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("QRLinkSpot", w / 2, PAD + 6);
+    }
+
+    ctx.drawImage(src, PAD, PAD + HEADER);
+
+    if (FOOTER > 0 && caption) {
+      const cy = PAD + HEADER + src.height + FOOTER / 2 + 4;
+      ctx.fillStyle = accent;
+      ctx.font = "800 32px ui-sans-serif, system-ui, -apple-system";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(caption.toUpperCase(), w / 2, cy);
+    }
+
+    return out;
+  };
+
   const handleDownload = () => {
-    const canvas = getCanvas();
-    if (!canvas) return;
+    const out = renderDesignToCanvas();
+    if (!out) return;
     try {
-      const dataUrl = canvas.toDataURL("image/png");
+      const dataUrl = out.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = dataUrl;
       a.download = "qrlinkspot-qr.png";
@@ -75,9 +172,9 @@ function FreeQRPage() {
   };
 
   const handlePrint = () => {
-    const canvas = getCanvas();
-    if (!canvas) return;
-    const dataUrl = canvas.toDataURL("image/png");
+    const out = renderDesignToCanvas();
+    if (!out) return;
+    const dataUrl = out.toDataURL("image/png");
     const w = window.open("", "_blank", "width=600,height=700");
     if (!w) {
       toast.error("Pop-up blocked — allow pop-ups to print");
@@ -90,7 +187,7 @@ function FreeQRPage() {
       <style>
         body { margin:0; display:flex; align-items:center; justify-content:center; min-height:100vh; font-family: system-ui, sans-serif; }
         .wrap { text-align:center; padding:24px; }
-        img { width: 320px; height: 320px; image-rendering: pixelated; }
+        img { width: 360px; height: auto; image-rendering: pixelated; }
         p { margin-top:16px; font-size:12px; color:#555; word-break:break-all; }
       </style></head><body>
       <div class="wrap">
@@ -115,7 +212,7 @@ function FreeQRPage() {
               Free <span className="text-gradient-brand">QR Code</span> Generator
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-              Paste any link and download your QR code as a PNG. Instant, free, no account needed.
+              Paste any link, pick a design, and download a beautiful QR code as a PNG. Instant, free, no account needed.
             </p>
           </div>
         </section>
@@ -123,9 +220,7 @@ function FreeQRPage() {
         <section className="px-4 pb-16 sm:px-6">
           <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-2 lg:items-start">
             <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
-              <Label htmlFor="url" className="text-base font-semibold">
-                Your link
-              </Label>
+              <Label htmlFor="url" className="text-base font-semibold">Your link</Label>
               <p className="mt-1 text-sm text-muted-foreground">
                 Enter the full URL (must start with http:// or https://).
               </p>
@@ -144,6 +239,45 @@ function FreeQRPage() {
                 </p>
               )}
 
+              <div className="mt-6">
+                <Label className="text-base font-semibold">Design</Label>
+                <p className="mt-1 text-sm text-muted-foreground">Pick a style — frame and colors update instantly.</p>
+                <div className="mt-3 grid grid-cols-4 gap-2">
+                  {PRESETS.map((p) => {
+                    const active = preset.id === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setPreset(p)}
+                        className={`flex flex-col items-center gap-1.5 rounded-xl border p-2 transition ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-foreground/30"}`}
+                        aria-label={p.name}
+                      >
+                        <span
+                          className="flex h-10 w-10 items-center justify-center rounded-lg"
+                          style={{ background: p.bg, border: `1px solid ${p.fg}20` }}
+                        >
+                          <span className="h-5 w-5 rounded-sm" style={{ background: p.fg }} />
+                        </span>
+                        <span className="text-[11px] font-medium text-muted-foreground">{p.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <Label htmlFor="caption" className="text-base font-semibold">Caption</Label>
+                <p className="mt-1 text-sm text-muted-foreground">Short text below the QR (or leave empty).</p>
+                <Input
+                  id="caption"
+                  value={caption}
+                  onChange={(e) => setCaption(e.target.value.slice(0, 18))}
+                  placeholder="SCAN ME"
+                  className="mt-3"
+                />
+              </div>
+
               <div className="mt-6 rounded-xl border border-primary/30 bg-primary/5 p-4">
                 <p className="text-sm font-medium">Want more?</p>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -158,13 +292,22 @@ function FreeQRPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-border bg-gradient-card p-8 shadow-soft">
-              <div ref={qrWrapRef} className="flex justify-center">
-                <QRPreview
-                  value={valid ? trimmed : "https://qrlinkspot.app"}
-                  size={280}
-                  showDownload={false}
-                />
+            <div className="lg:sticky lg:top-24">
+              <div
+                className="rounded-3xl border border-border p-8 shadow-soft transition-colors"
+                style={{ background: preset.bg }}
+              >
+                <DesignFrame preset={preset} caption={caption}>
+                  <div ref={qrWrapRef}>
+                    <QRPreview
+                      value={valid ? trimmed : "https://qrlinkspot.app"}
+                      size={260}
+                      fgColor={preset.fg}
+                      bgColor={preset.bg}
+                      showDownload={false}
+                    />
+                  </div>
+                </DesignFrame>
               </div>
               {valid ? (
                 <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
@@ -187,4 +330,67 @@ function FreeQRPage() {
       <SiteFooter />
     </div>
   );
+}
+
+function DesignFrame({
+  preset,
+  caption,
+  children,
+}: {
+  preset: Preset;
+  caption: string;
+  children: React.ReactNode;
+}) {
+  const accent = preset.accent || preset.fg;
+  const frameStyle: React.CSSProperties =
+    preset.frame === "rounded"
+      ? { border: `3px solid ${accent}`, borderRadius: 24 }
+      : preset.frame === "dotted"
+        ? { border: `3px dashed ${accent}`, borderRadius: 24 }
+        : {};
+
+  return (
+    <div className="relative mx-auto w-fit p-6" style={frameStyle}>
+      {preset.frame === "scan" && <CornerBrackets color={accent} />}
+      {preset.frame !== "none" && (
+        <p
+          className="mb-3 text-center text-xs font-semibold uppercase tracking-[0.2em]"
+          style={{ color: preset.fg }}
+        >
+          QRLinkSpot
+        </p>
+      )}
+      {children}
+      {preset.frame !== "none" && caption && (
+        <p
+          className="mt-3 text-center text-lg font-extrabold uppercase tracking-widest"
+          style={{ color: accent }}
+        >
+          {caption}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function CornerBrackets({ color }: { color: string }) {
+  const base = "absolute h-6 w-6";
+  return (
+    <span style={{ color }}>
+      <span className={`${base} left-0 top-0 border-l-4 border-t-4 rounded-tl-md`} style={{ borderColor: color }} />
+      <span className={`${base} right-0 top-0 border-r-4 border-t-4 rounded-tr-md`} style={{ borderColor: color }} />
+      <span className={`${base} bottom-0 left-0 border-b-4 border-l-4 rounded-bl-md`} style={{ borderColor: color }} />
+      <span className={`${base} bottom-0 right-0 border-b-4 border-r-4 rounded-br-md`} style={{ borderColor: color }} />
+    </span>
+  );
+}
+
+function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
 }
