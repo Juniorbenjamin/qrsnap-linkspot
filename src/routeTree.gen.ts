@@ -17,6 +17,7 @@ import { Route as QrCodeForRestaurantRouteImport } from './routes/qr-code-for-re
 import { Route as QrCodeForRealEstateRouteImport } from './routes/qr-code-for-real-estate'
 import { Route as QrCodeForInstagramRouteImport } from './routes/qr-code-for-instagram'
 import { Route as QrCodeForHandymanRouteImport } from './routes/qr-code-for-handyman'
+import { Route as QrCodeForGymRouteImport } from './routes/qr-code-for-gym'
 import { Route as QrCodeForBusinessCardRouteImport } from './routes/qr-code-for-business-card'
 import { Route as QrCodeForBarbershopRouteImport } from './routes/qr-code-for-barbershop'
 import { Route as QrCodeRouteImport } from './routes/qr-code'
@@ -72,6 +73,11 @@ const QrCodeForInstagramRoute = QrCodeForInstagramRouteImport.update({
 const QrCodeForHandymanRoute = QrCodeForHandymanRouteImport.update({
   id: '/qr-code-for-handyman',
   path: '/qr-code-for-handyman',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrCodeForGymRoute = QrCodeForGymRouteImport.update({
+  id: '/qr-code-for-gym',
+  path: '/qr-code-for-gym',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QrCodeForBusinessCardRoute = QrCodeForBusinessCardRouteImport.update({
@@ -168,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/qr-code': typeof QrCodeRoute
   '/qr-code-for-barbershop': typeof QrCodeForBarbershopRoute
   '/qr-code-for-business-card': typeof QrCodeForBusinessCardRoute
+  '/qr-code-for-gym': typeof QrCodeForGymRoute
   '/qr-code-for-handyman': typeof QrCodeForHandymanRoute
   '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
   '/qr-code-for-real-estate': typeof QrCodeForRealEstateRoute
@@ -194,6 +201,7 @@ export interface FileRoutesByTo {
   '/qr-code': typeof QrCodeRoute
   '/qr-code-for-barbershop': typeof QrCodeForBarbershopRoute
   '/qr-code-for-business-card': typeof QrCodeForBusinessCardRoute
+  '/qr-code-for-gym': typeof QrCodeForGymRoute
   '/qr-code-for-handyman': typeof QrCodeForHandymanRoute
   '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
   '/qr-code-for-real-estate': typeof QrCodeForRealEstateRoute
@@ -221,6 +229,7 @@ export interface FileRoutesById {
   '/qr-code': typeof QrCodeRoute
   '/qr-code-for-barbershop': typeof QrCodeForBarbershopRoute
   '/qr-code-for-business-card': typeof QrCodeForBusinessCardRoute
+  '/qr-code-for-gym': typeof QrCodeForGymRoute
   '/qr-code-for-handyman': typeof QrCodeForHandymanRoute
   '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
   '/qr-code-for-real-estate': typeof QrCodeForRealEstateRoute
@@ -249,6 +258,7 @@ export interface FileRouteTypes {
     | '/qr-code'
     | '/qr-code-for-barbershop'
     | '/qr-code-for-business-card'
+    | '/qr-code-for-gym'
     | '/qr-code-for-handyman'
     | '/qr-code-for-instagram'
     | '/qr-code-for-real-estate'
@@ -275,6 +285,7 @@ export interface FileRouteTypes {
     | '/qr-code'
     | '/qr-code-for-barbershop'
     | '/qr-code-for-business-card'
+    | '/qr-code-for-gym'
     | '/qr-code-for-handyman'
     | '/qr-code-for-instagram'
     | '/qr-code-for-real-estate'
@@ -301,6 +312,7 @@ export interface FileRouteTypes {
     | '/qr-code'
     | '/qr-code-for-barbershop'
     | '/qr-code-for-business-card'
+    | '/qr-code-for-gym'
     | '/qr-code-for-handyman'
     | '/qr-code-for-instagram'
     | '/qr-code-for-real-estate'
@@ -328,6 +340,7 @@ export interface RootRouteChildren {
   QrCodeRoute: typeof QrCodeRoute
   QrCodeForBarbershopRoute: typeof QrCodeForBarbershopRoute
   QrCodeForBusinessCardRoute: typeof QrCodeForBusinessCardRoute
+  QrCodeForGymRoute: typeof QrCodeForGymRoute
   QrCodeForHandymanRoute: typeof QrCodeForHandymanRoute
   QrCodeForInstagramRoute: typeof QrCodeForInstagramRoute
   QrCodeForRealEstateRoute: typeof QrCodeForRealEstateRoute
@@ -398,6 +411,13 @@ declare module '@tanstack/react-router' {
       path: '/qr-code-for-handyman'
       fullPath: '/qr-code-for-handyman'
       preLoaderRoute: typeof QrCodeForHandymanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-code-for-gym': {
+      id: '/qr-code-for-gym'
+      path: '/qr-code-for-gym'
+      fullPath: '/qr-code-for-gym'
+      preLoaderRoute: typeof QrCodeForGymRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/qr-code-for-business-card': {
@@ -537,6 +557,7 @@ const rootRouteChildren: RootRouteChildren = {
   QrCodeRoute: QrCodeRoute,
   QrCodeForBarbershopRoute: QrCodeForBarbershopRoute,
   QrCodeForBusinessCardRoute: QrCodeForBusinessCardRoute,
+  QrCodeForGymRoute: QrCodeForGymRoute,
   QrCodeForHandymanRoute: QrCodeForHandymanRoute,
   QrCodeForInstagramRoute: QrCodeForInstagramRoute,
   QrCodeForRealEstateRoute: QrCodeForRealEstateRoute,
