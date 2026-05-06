@@ -181,6 +181,9 @@ function Home() {
           </div>
         </section>
 
+        {/* MOCKUP CAROUSEL */}
+        <MockupCarousel />
+
         {/* USE CASES — internal SEO links */}
         <section className="bg-muted/30 py-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
