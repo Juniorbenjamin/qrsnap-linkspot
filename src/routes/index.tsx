@@ -23,6 +23,7 @@ import {
   Palette,
   BarChart3,
 } from "lucide-react";
+import { MockupCarousel } from "@/components/MockupCarousel";
 
 export const Route = createFileRoute("/")({
   component: Home,
