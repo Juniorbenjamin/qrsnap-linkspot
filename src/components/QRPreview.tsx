@@ -10,6 +10,8 @@ type Props = {
   bgColor?: string;
   logoText?: string;
   logoUrl?: string;
+  logoSizeRatio?: number; // override auto-shrink (0.05 - 0.30)
+  logoPadding?: number; // extra background padding around logo, px at render size
   size?: number;
   showDownload?: boolean;
 };
@@ -18,7 +20,7 @@ type Props = {
 // that produces a scannable QR.
 const LOGO_RATIOS = [0.24, 0.20, 0.16, 0.12, 0.08, 0];
 
-type ScanStatus = "checking" | "ok" | "shrunk" | "failed" | "idle";
+type ScanStatus = "checking" | "ok" | "shrunk" | "failed" | "idle" | "manual";
 
 export function QRPreview({
   value,
@@ -26,12 +28,15 @@ export function QRPreview({
   bgColor = "#ffffff",
   logoText,
   logoUrl,
+  logoSizeRatio,
+  logoPadding = 6,
   size = 240,
   showDownload = true,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [logoRatio, setLogoRatio] = useState<number>(LOGO_RATIOS[0]);
   const [status, setStatus] = useState<ScanStatus>("idle");
+  const manual = typeof logoSizeRatio === "number";
 
   // Re-test scannability whenever the QR content, colors, or logo change.
   useEffect(() => {
@@ -41,10 +46,15 @@ export function QRPreview({
       return;
     }
 
+    if (manual) {
+      setLogoRatio(logoSizeRatio!);
+      setStatus("manual");
+      return;
+    }
+
     let cancelled = false;
     setStatus("checking");
 
-    // Try each ratio, biggest first. Render off-screen, then decode.
     const test = async () => {
       for (let i = 0; i < LOGO_RATIOS.length; i++) {
         const ratio = LOGO_RATIOS[i];
@@ -52,7 +62,7 @@ export function QRPreview({
           value: value || "https://qrlinkspot.app",
           fgColor,
           bgColor,
-          size: 320, // test at higher resolution for reliable decode
+          size: 320,
           logoUrl,
           ratio,
         });
@@ -73,7 +83,7 @@ export function QRPreview({
     return () => {
       cancelled = true;
     };
-  }, [value, fgColor, bgColor, logoUrl]);
+  }, [value, fgColor, bgColor, logoUrl, manual, logoSizeRatio]);
 
   const download = () => {
     const canvas = ref.current?.querySelector("canvas") as HTMLCanvasElement | null;
@@ -95,6 +105,10 @@ export function QRPreview({
         }
       : undefined;
 
+  // Overlay padding ring so the user can see the configured padding visually
+  const logoPx = imageSettings ? imageSettings.width : 0;
+  const ringPx = logoPx + logoPadding * 2;
+
   return (
     <div className="flex flex-col items-center gap-3">
       <div
@@ -111,6 +125,27 @@ export function QRPreview({
           marginSize={2}
           imageSettings={imageSettings}
         />
+        {imageSettings && logoPadding > 0 && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg"
+            style={{
+              width: ringPx,
+              height: ringPx,
+              background: bgColor,
+              boxShadow: `0 0 0 2px ${bgColor}`,
+            }}
+          />
+        )}
+        {imageSettings && (
+          <img
+            src={imageSettings.src}
+            alt=""
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-md object-contain"
+            style={{ width: logoPx, height: logoPx }}
+          />
+        )}
         {logoText && !logoUrl && (
           <div
             className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-lg px-2 py-1 text-xs font-bold shadow-soft"
