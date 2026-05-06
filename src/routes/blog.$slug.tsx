@@ -171,7 +171,7 @@ function BlogPost() {
           </div>
 
           <div className="prose prose-neutral mt-10 max-w-none dark:prose-invert">
-            {post.body.map((b, i) => {
+            {post.body.map((b: any, i: number) => {
               if (b.type === "h2") return <h2 key={i} className="mt-8 text-2xl font-bold tracking-tight">{b.text}</h2>;
               if (b.type === "h3") return <h3 key={i} className="mt-6 text-xl font-semibold">{b.text}</h3>;
               if (b.type === "p") return <p key={i} className="mt-4 leading-relaxed text-foreground/90">{b.text}</p>;
