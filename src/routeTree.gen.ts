@@ -15,6 +15,7 @@ import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as QrCodeForWifiRouteImport } from './routes/qr-code-for-wifi'
 import { Route as QrCodeForRestaurantRouteImport } from './routes/qr-code-for-restaurant'
 import { Route as QrCodeForInstagramRouteImport } from './routes/qr-code-for-instagram'
+import { Route as QrCodeForHandymanRouteImport } from './routes/qr-code-for-handyman'
 import { Route as QrCodeForBusinessCardRouteImport } from './routes/qr-code-for-business-card'
 import { Route as QrCodeRouteImport } from './routes/qr-code'
 import { Route as QrRouteImport } from './routes/qr'
@@ -59,6 +60,11 @@ const QrCodeForRestaurantRoute = QrCodeForRestaurantRouteImport.update({
 const QrCodeForInstagramRoute = QrCodeForInstagramRouteImport.update({
   id: '/qr-code-for-instagram',
   path: '/qr-code-for-instagram',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrCodeForHandymanRoute = QrCodeForHandymanRouteImport.update({
+  id: '/qr-code-for-handyman',
+  path: '/qr-code-for-handyman',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QrCodeForBusinessCardRoute = QrCodeForBusinessCardRouteImport.update({
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/qr': typeof QrRoute
   '/qr-code': typeof QrCodeRoute
   '/qr-code-for-business-card': typeof QrCodeForBusinessCardRoute
+  '/qr-code-for-handyman': typeof QrCodeForHandymanRoute
   '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
   '/qr-code-for-restaurant': typeof QrCodeForRestaurantRoute
   '/qr-code-for-wifi': typeof QrCodeForWifiRoute
@@ -172,6 +179,7 @@ export interface FileRoutesByTo {
   '/qr': typeof QrRoute
   '/qr-code': typeof QrCodeRoute
   '/qr-code-for-business-card': typeof QrCodeForBusinessCardRoute
+  '/qr-code-for-handyman': typeof QrCodeForHandymanRoute
   '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
   '/qr-code-for-restaurant': typeof QrCodeForRestaurantRoute
   '/qr-code-for-wifi': typeof QrCodeForWifiRoute
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/qr': typeof QrRoute
   '/qr-code': typeof QrCodeRoute
   '/qr-code-for-business-card': typeof QrCodeForBusinessCardRoute
+  '/qr-code-for-handyman': typeof QrCodeForHandymanRoute
   '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
   '/qr-code-for-restaurant': typeof QrCodeForRestaurantRoute
   '/qr-code-for-wifi': typeof QrCodeForWifiRoute
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
     | '/qr'
     | '/qr-code'
     | '/qr-code-for-business-card'
+    | '/qr-code-for-handyman'
     | '/qr-code-for-instagram'
     | '/qr-code-for-restaurant'
     | '/qr-code-for-wifi'
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
     | '/qr'
     | '/qr-code'
     | '/qr-code-for-business-card'
+    | '/qr-code-for-handyman'
     | '/qr-code-for-instagram'
     | '/qr-code-for-restaurant'
     | '/qr-code-for-wifi'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/qr'
     | '/qr-code'
     | '/qr-code-for-business-card'
+    | '/qr-code-for-handyman'
     | '/qr-code-for-instagram'
     | '/qr-code-for-restaurant'
     | '/qr-code-for-wifi'
@@ -291,6 +303,7 @@ export interface RootRouteChildren {
   QrRoute: typeof QrRoute
   QrCodeRoute: typeof QrCodeRoute
   QrCodeForBusinessCardRoute: typeof QrCodeForBusinessCardRoute
+  QrCodeForHandymanRoute: typeof QrCodeForHandymanRoute
   QrCodeForInstagramRoute: typeof QrCodeForInstagramRoute
   QrCodeForRestaurantRoute: typeof QrCodeForRestaurantRoute
   QrCodeForWifiRoute: typeof QrCodeForWifiRoute
@@ -345,6 +358,13 @@ declare module '@tanstack/react-router' {
       path: '/qr-code-for-instagram'
       fullPath: '/qr-code-for-instagram'
       preLoaderRoute: typeof QrCodeForInstagramRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-code-for-handyman': {
+      id: '/qr-code-for-handyman'
+      path: '/qr-code-for-handyman'
+      fullPath: '/qr-code-for-handyman'
+      preLoaderRoute: typeof QrCodeForHandymanRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/qr-code-for-business-card': {
@@ -476,6 +496,7 @@ const rootRouteChildren: RootRouteChildren = {
   QrRoute: QrRoute,
   QrCodeRoute: QrCodeRoute,
   QrCodeForBusinessCardRoute: QrCodeForBusinessCardRoute,
+  QrCodeForHandymanRoute: QrCodeForHandymanRoute,
   QrCodeForInstagramRoute: QrCodeForInstagramRoute,
   QrCodeForRestaurantRoute: QrCodeForRestaurantRoute,
   QrCodeForWifiRoute: QrCodeForWifiRoute,
@@ -490,3 +511,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
