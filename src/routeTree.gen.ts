@@ -28,6 +28,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as LinksIdRouteImport } from './routes/links.$id'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as AdminMockupsRouteImport } from './routes/admin.mockups'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 
 const TermsRoute = TermsRouteImport.update({
@@ -125,6 +126,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
+const AdminMockupsRoute = AdminMockupsRouteImport.update({
+  id: '/admin/mockups',
+  path: '/admin/mockups',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -149,6 +155,7 @@ export interface FileRoutesByFullPath {
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/admin/mockups': typeof AdminMockupsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/links/$id': typeof LinksIdRoute
   '/u/$username': typeof UUsernameRoute
@@ -171,6 +178,7 @@ export interface FileRoutesByTo {
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/admin/mockups': typeof AdminMockupsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/links/$id': typeof LinksIdRoute
   '/u/$username': typeof UUsernameRoute
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
+  '/admin/mockups': typeof AdminMockupsRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/links/$id': typeof LinksIdRoute
   '/u/$username': typeof UUsernameRoute
@@ -218,6 +227,7 @@ export interface FileRouteTypes {
     | '/refund-policy'
     | '/signup'
     | '/terms'
+    | '/admin/mockups'
     | '/blog/$slug'
     | '/links/$id'
     | '/u/$username'
@@ -240,6 +250,7 @@ export interface FileRouteTypes {
     | '/refund-policy'
     | '/signup'
     | '/terms'
+    | '/admin/mockups'
     | '/blog/$slug'
     | '/links/$id'
     | '/u/$username'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/refund-policy'
     | '/signup'
     | '/terms'
+    | '/admin/mockups'
     | '/blog/$slug'
     | '/links/$id'
     | '/u/$username'
@@ -285,6 +297,7 @@ export interface RootRouteChildren {
   RefundPolicyRoute: typeof RefundPolicyRoute
   SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
+  AdminMockupsRoute: typeof AdminMockupsRoute
   LinksIdRoute: typeof LinksIdRoute
   UUsernameRoute: typeof UUsernameRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
@@ -425,6 +438,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
     }
+    '/admin/mockups': {
+      id: '/admin/mockups'
+      path: '/admin/mockups'
+      fullPath: '/admin/mockups'
+      preLoaderRoute: typeof AdminMockupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -462,6 +482,7 @@ const rootRouteChildren: RootRouteChildren = {
   RefundPolicyRoute: RefundPolicyRoute,
   SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
+  AdminMockupsRoute: AdminMockupsRoute,
   LinksIdRoute: LinksIdRoute,
   UUsernameRoute: UUsernameRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
@@ -469,12 +490,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

@@ -23,6 +23,7 @@ import {
   Palette,
   BarChart3,
 } from "lucide-react";
+import { MockupCarousel } from "@/components/MockupCarousel";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -179,6 +180,9 @@ function Home() {
             </div>
           </div>
         </section>
+
+        {/* MOCKUP CAROUSEL */}
+        <MockupCarousel />
 
         {/* USE CASES — internal SEO links */}
         <section className="bg-muted/30 py-16">

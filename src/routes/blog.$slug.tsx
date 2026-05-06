@@ -171,14 +171,14 @@ function BlogPost() {
           </div>
 
           <div className="prose prose-neutral mt-10 max-w-none dark:prose-invert">
-            {post.body.map((b, i) => {
+            {post.body.map((b: any, i: number) => {
               if (b.type === "h2") return <h2 key={i} className="mt-8 text-2xl font-bold tracking-tight">{b.text}</h2>;
               if (b.type === "h3") return <h3 key={i} className="mt-6 text-xl font-semibold">{b.text}</h3>;
               if (b.type === "p") return <p key={i} className="mt-4 leading-relaxed text-foreground/90">{b.text}</p>;
               if (b.type === "quote") return <blockquote key={i} className="my-6 border-l-4 border-primary pl-4 italic text-muted-foreground">{b.text}</blockquote>;
               if (b.type === "ul") return (
                 <ul key={i} className="mt-4 space-y-2 pl-5 text-foreground/90">
-                  {b.items?.map((it) => <li key={it} className="list-disc">{it}</li>)}
+                  {b.items?.map((it: string) => <li key={it} className="list-disc">{it}</li>)}
                 </ul>
               );
               return null;
