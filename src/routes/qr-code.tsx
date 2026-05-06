@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { QRPreview } from "@/components/QRPreview";
-import { ArrowRight, Download, Printer, Sparkles } from "lucide-react";
+import { ArrowRight, Download, Printer, Sparkles, Upload, X } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/qr-code")({
