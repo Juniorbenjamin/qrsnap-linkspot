@@ -17,6 +17,7 @@ import { Route as QrCodeForRestaurantRouteImport } from './routes/qr-code-for-re
 import { Route as QrCodeForInstagramRouteImport } from './routes/qr-code-for-instagram'
 import { Route as QrCodeForHandymanRouteImport } from './routes/qr-code-for-handyman'
 import { Route as QrCodeForBusinessCardRouteImport } from './routes/qr-code-for-business-card'
+import { Route as QrCodeForBarbershopRouteImport } from './routes/qr-code-for-barbershop'
 import { Route as QrCodeRouteImport } from './routes/qr-code'
 import { Route as QrRouteImport } from './routes/qr'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -70,6 +71,11 @@ const QrCodeForHandymanRoute = QrCodeForHandymanRouteImport.update({
 const QrCodeForBusinessCardRoute = QrCodeForBusinessCardRouteImport.update({
   id: '/qr-code-for-business-card',
   path: '/qr-code-for-business-card',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrCodeForBarbershopRoute = QrCodeForBarbershopRouteImport.update({
+  id: '/qr-code-for-barbershop',
+  path: '/qr-code-for-barbershop',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QrCodeRoute = QrCodeRouteImport.update({
@@ -154,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
   '/qr-code': typeof QrCodeRoute
+  '/qr-code-for-barbershop': typeof QrCodeForBarbershopRoute
   '/qr-code-for-business-card': typeof QrCodeForBusinessCardRoute
   '/qr-code-for-handyman': typeof QrCodeForHandymanRoute
   '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
@@ -178,6 +185,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
   '/qr-code': typeof QrCodeRoute
+  '/qr-code-for-barbershop': typeof QrCodeForBarbershopRoute
   '/qr-code-for-business-card': typeof QrCodeForBusinessCardRoute
   '/qr-code-for-handyman': typeof QrCodeForHandymanRoute
   '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
@@ -203,6 +211,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/qr': typeof QrRoute
   '/qr-code': typeof QrCodeRoute
+  '/qr-code-for-barbershop': typeof QrCodeForBarbershopRoute
   '/qr-code-for-business-card': typeof QrCodeForBusinessCardRoute
   '/qr-code-for-handyman': typeof QrCodeForHandymanRoute
   '/qr-code-for-instagram': typeof QrCodeForInstagramRoute
@@ -229,6 +238,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/qr'
     | '/qr-code'
+    | '/qr-code-for-barbershop'
     | '/qr-code-for-business-card'
     | '/qr-code-for-handyman'
     | '/qr-code-for-instagram'
@@ -253,6 +263,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/qr'
     | '/qr-code'
+    | '/qr-code-for-barbershop'
     | '/qr-code-for-business-card'
     | '/qr-code-for-handyman'
     | '/qr-code-for-instagram'
@@ -277,6 +288,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/qr'
     | '/qr-code'
+    | '/qr-code-for-barbershop'
     | '/qr-code-for-business-card'
     | '/qr-code-for-handyman'
     | '/qr-code-for-instagram'
@@ -302,6 +314,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   QrRoute: typeof QrRoute
   QrCodeRoute: typeof QrCodeRoute
+  QrCodeForBarbershopRoute: typeof QrCodeForBarbershopRoute
   QrCodeForBusinessCardRoute: typeof QrCodeForBusinessCardRoute
   QrCodeForHandymanRoute: typeof QrCodeForHandymanRoute
   QrCodeForInstagramRoute: typeof QrCodeForInstagramRoute
@@ -372,6 +385,13 @@ declare module '@tanstack/react-router' {
       path: '/qr-code-for-business-card'
       fullPath: '/qr-code-for-business-card'
       preLoaderRoute: typeof QrCodeForBusinessCardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-code-for-barbershop': {
+      id: '/qr-code-for-barbershop'
+      path: '/qr-code-for-barbershop'
+      fullPath: '/qr-code-for-barbershop'
+      preLoaderRoute: typeof QrCodeForBarbershopRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/qr-code': {
@@ -495,6 +515,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   QrRoute: QrRoute,
   QrCodeRoute: QrCodeRoute,
+  QrCodeForBarbershopRoute: QrCodeForBarbershopRoute,
   QrCodeForBusinessCardRoute: QrCodeForBusinessCardRoute,
   QrCodeForHandymanRoute: QrCodeForHandymanRoute,
   QrCodeForInstagramRoute: QrCodeForInstagramRoute,
