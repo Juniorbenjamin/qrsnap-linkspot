@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { QRPreview } from "@/components/QRPreview";
+import { StyledQR, type DotStyle, type EyeStyle } from "@/components/StyledQR";
 import { ArrowRight, Download, Printer, Sparkles, Upload, X } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
@@ -56,17 +56,33 @@ type Preset = {
   bg: string;
   frame: "none" | "scan" | "rounded" | "dotted";
   accent?: string;
+  gradient?: { from: string; to: string; angle?: number };
 };
 
 const PRESETS: Preset[] = [
   { id: "midnight", name: "Midnight", fg: "#0F172A", bg: "#FFFFFF", frame: "rounded" },
-  { id: "ocean", name: "Ocean", fg: "#0E7490", bg: "#ECFEFF", frame: "scan", accent: "#0E7490" },
-  { id: "sunset", name: "Sunset", fg: "#9A3412", bg: "#FFF7ED", frame: "scan", accent: "#EA580C" },
+  { id: "ocean", name: "Ocean", fg: "#0E7490", bg: "#ECFEFF", frame: "scan", accent: "#0E7490", gradient: { from: "#0EA5E9", to: "#0E7490", angle: 135 } },
+  { id: "sunset", name: "Sunset", fg: "#9A3412", bg: "#FFF7ED", frame: "scan", accent: "#EA580C", gradient: { from: "#F59E0B", to: "#DC2626", angle: 135 } },
   { id: "forest", name: "Forest", fg: "#14532D", bg: "#F0FDF4", frame: "rounded" },
-  { id: "berry", name: "Berry", fg: "#581C87", bg: "#FAF5FF", frame: "dotted", accent: "#7E22CE" },
-  { id: "rose", name: "Rose", fg: "#9F1239", bg: "#FFF1F2", frame: "scan", accent: "#E11D48" },
+  { id: "berry", name: "Berry", fg: "#581C87", bg: "#FAF5FF", frame: "dotted", accent: "#7E22CE", gradient: { from: "#A855F7", to: "#581C87", angle: 135 } },
+  { id: "rose", name: "Rose", fg: "#9F1239", bg: "#FFF1F2", frame: "scan", accent: "#E11D48", gradient: { from: "#FB7185", to: "#9F1239", angle: 135 } },
   { id: "mono", name: "Mono", fg: "#000000", bg: "#FFFFFF", frame: "none" },
   { id: "ink", name: "Ink", fg: "#1E293B", bg: "#F8FAFC", frame: "dotted", accent: "#334155" },
+];
+
+const DOT_STYLES: { id: DotStyle; name: string }[] = [
+  { id: "square", name: "Square" },
+  { id: "rounded", name: "Rounded" },
+  { id: "dots", name: "Dots" },
+  { id: "classy", name: "Classy" },
+  { id: "diamond", name: "Diamond" },
+];
+
+const EYE_STYLES: { id: EyeStyle; name: string }[] = [
+  { id: "square", name: "Square" },
+  { id: "rounded", name: "Rounded" },
+  { id: "circle", name: "Circle" },
+  { id: "leaf", name: "Leaf" },
 ];
 
 function FreeQRPage() {
@@ -74,8 +90,11 @@ function FreeQRPage() {
   const [preset, setPreset] = useState<Preset>(PRESETS[0]);
   const [caption, setCaption] = useState("SCAN ME");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [logoSize, setLogoSize] = useState<number>(0.20); // 0.08 - 0.30
-  const [logoPad, setLogoPad] = useState<number>(8); // px in preview
+  const [logoSize, setLogoSize] = useState<number>(0.20);
+  const [logoPad, setLogoPad] = useState<number>(8);
+  const [dotStyle, setDotStyle] = useState<DotStyle>("rounded");
+  const [eyeStyle, setEyeStyle] = useState<EyeStyle>("rounded");
+  const [useGradient, setUseGradient] = useState<boolean>(true);
   const trimmed = url.trim();
   const valid = isValidUrl(trimmed);
   const qrWrapRef = useRef<HTMLDivElement>(null);
@@ -101,9 +120,10 @@ function FreeQRPage() {
   const renderDesignToCanvas = async (): Promise<HTMLCanvasElement | null> => {
     const src = getCanvas();
     if (!src) return null;
-    const PAD = 80;
-    const HEADER = preset.frame !== "none" ? 70 : 0;
-    const FOOTER = preset.frame !== "none" && caption ? 90 : 0;
+    const scale = src.width / 260; // normalize to design size 260
+    const PAD = Math.round(80 * scale);
+    const HEADER = preset.frame !== "none" ? Math.round(70 * scale) : 0;
+    const FOOTER = preset.frame !== "none" && caption ? Math.round(90 * scale) : 0;
     const w = src.width + PAD * 2;
     const h = src.height + PAD * 2 + HEADER + FOOTER;
     const out = document.createElement("canvas");
@@ -119,23 +139,23 @@ function FreeQRPage() {
     const accent = preset.accent || preset.fg;
     if (preset.frame === "rounded") {
       ctx.strokeStyle = accent;
-      ctx.lineWidth = 8;
-      roundRect(ctx, 16, 16, w - 32, h - 32, 36);
+      ctx.lineWidth = 8 * scale;
+      roundRect(ctx, 16 * scale, 16 * scale, w - 32 * scale, h - 32 * scale, 36 * scale);
       ctx.stroke();
     } else if (preset.frame === "dotted") {
       ctx.strokeStyle = accent;
-      ctx.lineWidth = 6;
-      ctx.setLineDash([2, 14]);
+      ctx.lineWidth = 6 * scale;
+      ctx.setLineDash([2 * scale, 14 * scale]);
       ctx.lineCap = "round";
-      roundRect(ctx, 20, 20, w - 40, h - 40, 32);
+      roundRect(ctx, 20 * scale, 20 * scale, w - 40 * scale, h - 40 * scale, 32 * scale);
       ctx.stroke();
       ctx.setLineDash([]);
     } else if (preset.frame === "scan") {
       ctx.strokeStyle = accent;
-      ctx.lineWidth = 10;
+      ctx.lineWidth = 10 * scale;
       ctx.lineCap = "round";
-      const L = 60;
-      const m = 24;
+      const L = 60 * scale;
+      const m = 24 * scale;
       const corners: Array<[number, number, number, number]> = [
         [m, m, 1, 1],
         [w - m, m, -1, 1],
@@ -153,41 +173,21 @@ function FreeQRPage() {
 
     if (HEADER > 0) {
       ctx.fillStyle = preset.fg;
-      ctx.font = "600 26px ui-sans-serif, system-ui, -apple-system";
+      ctx.font = `600 ${Math.round(26 * scale)}px ui-sans-serif, system-ui, -apple-system`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("QRLinkSpot", w / 2, PAD + 6);
+      ctx.fillText("QRLinkSpot", w / 2, PAD + 6 * scale);
     }
 
     ctx.drawImage(src, PAD, PAD + HEADER);
 
-    // Draw padding ring + crisp logo on top of the embedded logo for cleaner output
-    if (logoUrl) {
-      const qrSize = src.width;
-      const logoPx = Math.round(qrSize * logoSize);
-      const ringPx = logoPx + logoPad * 2;
-      const cx = PAD + qrSize / 2;
-      const cy = PAD + HEADER + qrSize / 2;
-      ctx.fillStyle = preset.bg;
-      const rx = cx - ringPx / 2;
-      const ry = cy - ringPx / 2;
-      roundRect(ctx, rx, ry, ringPx, ringPx, 12);
-      ctx.fill();
-      try {
-        const img = await loadImg(logoUrl);
-        ctx.drawImage(img, cx - logoPx / 2, cy - logoPx / 2, logoPx, logoPx);
-      } catch {
-        /* ignore */
-      }
-    }
-
     if (FOOTER > 0 && caption) {
-      const cy = PAD + HEADER + src.height + FOOTER / 2 + 4;
+      const cyFooter = PAD + HEADER + src.height + FOOTER / 2 + 4 * scale;
       ctx.fillStyle = accent;
-      ctx.font = "800 32px ui-sans-serif, system-ui, -apple-system";
+      ctx.font = `800 ${Math.round(32 * scale)}px ui-sans-serif, system-ui, -apple-system`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(caption.toUpperCase(), w / 2, cy);
+      ctx.fillText(caption.toUpperCase(), w / 2, cyFooter);
     }
 
     return out;
@@ -305,6 +305,61 @@ function FreeQRPage() {
                 </div>
               </div>
 
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div>
+                  <Label className="text-base font-semibold">Dot shape</Label>
+                  <div className="mt-2 grid grid-cols-5 gap-1.5">
+                    {DOT_STYLES.map((d) => {
+                      const active = dotStyle === d.id;
+                      return (
+                        <button
+                          key={d.id}
+                          type="button"
+                          onClick={() => setDotStyle(d.id)}
+                          className={`flex flex-col items-center gap-1 rounded-lg border p-1.5 text-[10px] transition ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-foreground/30"}`}
+                          aria-label={d.name}
+                        >
+                          <DotShapePreview style={d.id} color={preset.fg} />
+                          <span className="font-medium text-muted-foreground">{d.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-base font-semibold">Eye shape</Label>
+                  <div className="mt-2 grid grid-cols-4 gap-1.5">
+                    {EYE_STYLES.map((e) => {
+                      const active = eyeStyle === e.id;
+                      return (
+                        <button
+                          key={e.id}
+                          type="button"
+                          onClick={() => setEyeStyle(e.id)}
+                          className={`flex flex-col items-center gap-1 rounded-lg border p-1.5 text-[10px] transition ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-foreground/30"}`}
+                          aria-label={e.name}
+                        >
+                          <EyeShapePreview style={e.id} color={preset.accent || preset.fg} />
+                          <span className="font-medium text-muted-foreground">{e.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {preset.gradient && (
+                <label className="mt-4 flex cursor-pointer items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={useGradient}
+                    onChange={(e) => setUseGradient(e.target.checked)}
+                    className="h-4 w-4 rounded border-border"
+                  />
+                  Use gradient fill
+                </label>
+              )}
+
               <div className="mt-6">
                 <Label htmlFor="caption" className="text-base font-semibold">Caption</Label>
                 <p className="mt-1 text-sm text-muted-foreground">Short text below the QR (or leave empty).</p>
@@ -393,15 +448,18 @@ function FreeQRPage() {
               >
                 <DesignFrame preset={preset} caption={caption}>
                   <div ref={qrWrapRef}>
-                    <QRPreview
+                    <StyledQR
                       value={valid ? trimmed : "https://qrlinkspot.app"}
                       size={260}
                       fgColor={preset.fg}
                       bgColor={preset.bg}
+                      gradient={useGradient && preset.gradient ? preset.gradient : null}
+                      dotStyle={dotStyle}
+                      eyeStyle={eyeStyle}
+                      eyeColor={preset.accent || preset.fg}
                       logoUrl={logoUrl ?? undefined}
-                      logoSizeRatio={logoUrl ? logoSize : undefined}
+                      logoSizeRatio={logoSize}
                       logoPadding={logoPad}
-                      showDownload={false}
                     />
                   </div>
                 </DesignFrame>
@@ -501,3 +559,37 @@ function loadImg(src: string): Promise<HTMLImageElement> {
     img.src = src;
   });
 }
+
+function DotShapePreview({ style, color }: { style: DotStyle; color: string }) {
+  // 3x3 grid demo of the module shape
+  const cells = Array.from({ length: 9 }, (_, i) => i);
+  const shape = (i: number) => {
+    const common = "h-2 w-2";
+    if (style === "dots") return <span key={i} className={`${common} rounded-full`} style={{ background: color }} />;
+    if (style === "rounded") return <span key={i} className={`${common} rounded-[3px]`} style={{ background: color }} />;
+    if (style === "diamond")
+      return <span key={i} className={`${common} rotate-45`} style={{ background: color }} />;
+    if (style === "classy")
+      return <span key={i} className={`${common} rounded-tl-[5px] rounded-br-[5px]`} style={{ background: color }} />;
+    return <span key={i} className={common} style={{ background: color }} />;
+  };
+  return (
+    <span className="grid grid-cols-3 gap-[2px]">
+      {cells.map((i) => shape(i))}
+    </span>
+  );
+}
+
+function EyeShapePreview({ style, color }: { style: EyeStyle; color: string }) {
+  const radius =
+    style === "circle" ? "9999px" : style === "rounded" ? "8px" : style === "leaf" ? "12px 0 12px 0" : "0";
+  return (
+    <span
+      className="flex h-7 w-7 items-center justify-center"
+      style={{ border: `3px solid ${color}`, borderRadius: radius }}
+    >
+      <span className="h-2.5 w-2.5" style={{ background: color, borderRadius: radius }} />
+    </span>
+  );
+}
+
