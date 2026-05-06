@@ -178,7 +178,7 @@ function BlogPost() {
               if (b.type === "quote") return <blockquote key={i} className="my-6 border-l-4 border-primary pl-4 italic text-muted-foreground">{b.text}</blockquote>;
               if (b.type === "ul") return (
                 <ul key={i} className="mt-4 space-y-2 pl-5 text-foreground/90">
-                  {b.items?.map((it) => <li key={it} className="list-disc">{it}</li>)}
+                  {b.items?.map((it: string) => <li key={it} className="list-disc">{it}</li>)}
                 </ul>
               );
               return null;
