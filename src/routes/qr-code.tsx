@@ -210,8 +210,8 @@ function FreeQRPage() {
     }
   };
 
-  const handlePrint = () => {
-    const out = renderDesignToCanvas();
+  const handlePrint = async () => {
+    const out = await renderDesignToCanvas();
     if (!out) return;
     const dataUrl = out.toDataURL("image/png");
     const w = window.open("", "_blank", "width=600,height=700");
