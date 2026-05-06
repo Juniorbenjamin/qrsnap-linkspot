@@ -173,41 +173,21 @@ function FreeQRPage() {
 
     if (HEADER > 0) {
       ctx.fillStyle = preset.fg;
-      ctx.font = "600 26px ui-sans-serif, system-ui, -apple-system";
+      ctx.font = `600 ${Math.round(26 * scale)}px ui-sans-serif, system-ui, -apple-system`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("QRLinkSpot", w / 2, PAD + 6);
+      ctx.fillText("QRLinkSpot", w / 2, PAD + 6 * scale);
     }
 
     ctx.drawImage(src, PAD, PAD + HEADER);
 
-    // Draw padding ring + crisp logo on top of the embedded logo for cleaner output
-    if (logoUrl) {
-      const qrSize = src.width;
-      const logoPx = Math.round(qrSize * logoSize);
-      const ringPx = logoPx + logoPad * 2;
-      const cx = PAD + qrSize / 2;
-      const cy = PAD + HEADER + qrSize / 2;
-      ctx.fillStyle = preset.bg;
-      const rx = cx - ringPx / 2;
-      const ry = cy - ringPx / 2;
-      roundRect(ctx, rx, ry, ringPx, ringPx, 12);
-      ctx.fill();
-      try {
-        const img = await loadImg(logoUrl);
-        ctx.drawImage(img, cx - logoPx / 2, cy - logoPx / 2, logoPx, logoPx);
-      } catch {
-        /* ignore */
-      }
-    }
-
     if (FOOTER > 0 && caption) {
-      const cy = PAD + HEADER + src.height + FOOTER / 2 + 4;
+      const cyFooter = PAD + HEADER + src.height + FOOTER / 2 + 4 * scale;
       ctx.fillStyle = accent;
-      ctx.font = "800 32px ui-sans-serif, system-ui, -apple-system";
+      ctx.font = `800 ${Math.round(32 * scale)}px ui-sans-serif, system-ui, -apple-system`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(caption.toUpperCase(), w / 2, cy);
+      ctx.fillText(caption.toUpperCase(), w / 2, cyFooter);
     }
 
     return out;
