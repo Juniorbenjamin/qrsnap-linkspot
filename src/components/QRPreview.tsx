@@ -190,6 +190,13 @@ function ScanStatusBadge({ status }: { status: ScanStatus }) {
       </p>
     );
   }
+  if (status === "manual") {
+    return (
+      <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <AlertTriangle className="h-3.5 w-3.5" /> Custom logo size — test scan before printing
+      </p>
+    );
+  }
   return (
     <p className="flex items-center gap-1.5 text-xs text-destructive">
       <AlertTriangle className="h-3.5 w-3.5" /> Logo hidden — QR was unscannable
