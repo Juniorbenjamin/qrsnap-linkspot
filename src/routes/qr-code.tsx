@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { QRPreview } from "@/components/QRPreview";
-import { ArrowRight, Download, Printer, Sparkles } from "lucide-react";
+import { ArrowRight, Download, Printer, Sparkles, Upload, X } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/qr-code")({
@@ -72,14 +73,32 @@ function FreeQRPage() {
   const [url, setUrl] = useState("");
   const [preset, setPreset] = useState<Preset>(PRESETS[0]);
   const [caption, setCaption] = useState("SCAN ME");
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoSize, setLogoSize] = useState<number>(0.20); // 0.08 - 0.30
+  const [logoPad, setLogoPad] = useState<number>(8); // px in preview
   const trimmed = url.trim();
   const valid = isValidUrl(trimmed);
   const qrWrapRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getCanvas = () =>
     qrWrapRef.current?.querySelector("canvas") as HTMLCanvasElement | null;
 
-  const renderDesignToCanvas = (): HTMLCanvasElement | null => {
+  const handleLogoUpload = (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Logo must be under 2MB");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setLogoUrl(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const renderDesignToCanvas = async (): Promise<HTMLCanvasElement | null> => {
     const src = getCanvas();
     if (!src) return null;
     const PAD = 80;
@@ -142,6 +161,26 @@ function FreeQRPage() {
 
     ctx.drawImage(src, PAD, PAD + HEADER);
 
+    // Draw padding ring + crisp logo on top of the embedded logo for cleaner output
+    if (logoUrl) {
+      const qrSize = src.width;
+      const logoPx = Math.round(qrSize * logoSize);
+      const ringPx = logoPx + logoPad * 2;
+      const cx = PAD + qrSize / 2;
+      const cy = PAD + HEADER + qrSize / 2;
+      ctx.fillStyle = preset.bg;
+      const rx = cx - ringPx / 2;
+      const ry = cy - ringPx / 2;
+      roundRect(ctx, rx, ry, ringPx, ringPx, 12);
+      ctx.fill();
+      try {
+        const img = await loadImg(logoUrl);
+        ctx.drawImage(img, cx - logoPx / 2, cy - logoPx / 2, logoPx, logoPx);
+      } catch {
+        /* ignore */
+      }
+    }
+
     if (FOOTER > 0 && caption) {
       const cy = PAD + HEADER + src.height + FOOTER / 2 + 4;
       ctx.fillStyle = accent;
@@ -154,8 +193,8 @@ function FreeQRPage() {
     return out;
   };
 
-  const handleDownload = () => {
-    const out = renderDesignToCanvas();
+  const handleDownload = async () => {
+    const out = await renderDesignToCanvas();
     if (!out) return;
     try {
       const dataUrl = out.toDataURL("image/png");
@@ -171,8 +210,8 @@ function FreeQRPage() {
     }
   };
 
-  const handlePrint = () => {
-    const out = renderDesignToCanvas();
+  const handlePrint = async () => {
+    const out = await renderDesignToCanvas();
     if (!out) return;
     const dataUrl = out.toDataURL("image/png");
     const w = window.open("", "_blank", "width=600,height=700");
@@ -278,6 +317,61 @@ function FreeQRPage() {
                 />
               </div>
 
+              <div className="mt-6">
+                <Label className="text-base font-semibold">Logo</Label>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Upload your logo to embed it in the center. PNG with transparent background works best.
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleLogoUpload(f);
+                    e.target.value = "";
+                  }}
+                />
+                {!logoUrl ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="mt-3"
+                  >
+                    <Upload className="mr-2 h-4 w-4" /> Upload logo
+                  </Button>
+                ) : (
+                  <div className="mt-3 space-y-4">
+                    <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/40 p-3">
+                      <img src={logoUrl} alt="Logo preview" className="h-12 w-12 rounded-md object-contain bg-white" />
+                      <div className="flex-1 text-sm text-muted-foreground">Logo embedded in QR</div>
+                      <Button type="button" variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()}>Replace</Button>
+                      <Button type="button" variant="ghost" size="icon" onClick={() => setLogoUrl(null)} aria-label="Remove logo">
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div>
+                      <div className="mb-2 flex items-center justify-between">
+                        <Label className="text-sm font-medium">Logo size</Label>
+                        <span className="text-xs text-muted-foreground">{Math.round(logoSize * 100)}%</span>
+                      </div>
+                      <Slider value={[logoSize * 100]} min={8} max={30} step={1} onValueChange={(v) => setLogoSize(v[0] / 100)} />
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        Larger logos can break scanability — test before printing.
+                      </p>
+                    </div>
+                    <div>
+                      <div className="mb-2 flex items-center justify-between">
+                        <Label className="text-sm font-medium">Logo padding</Label>
+                        <span className="text-xs text-muted-foreground">{logoPad}px</span>
+                      </div>
+                      <Slider value={[logoPad]} min={0} max={24} step={1} onValueChange={(v) => setLogoPad(v[0])} />
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="mt-6 rounded-xl border border-primary/30 bg-primary/5 p-4">
                 <p className="text-sm font-medium">Want more?</p>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -304,6 +398,9 @@ function FreeQRPage() {
                       size={260}
                       fgColor={preset.fg}
                       bgColor={preset.bg}
+                      logoUrl={logoUrl ?? undefined}
+                      logoSizeRatio={logoUrl ? logoSize : undefined}
+                      logoPadding={logoPad}
                       showDownload={false}
                     />
                   </div>
@@ -393,4 +490,14 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.arcTo(x, y + h, x, y, r);
   ctx.arcTo(x, y, x + w, y, r);
   ctx.closePath();
+}
+
+function loadImg(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
 }
