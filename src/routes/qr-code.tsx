@@ -193,8 +193,8 @@ function FreeQRPage() {
     return out;
   };
 
-  const handleDownload = () => {
-    const out = renderDesignToCanvas();
+  const handleDownload = async () => {
+    const out = await renderDesignToCanvas();
     if (!out) return;
     try {
       const dataUrl = out.toDataURL("image/png");
