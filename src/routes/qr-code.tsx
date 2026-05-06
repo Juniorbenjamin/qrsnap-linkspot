@@ -174,11 +174,8 @@ function FreeQRPage() {
       roundRect(ctx, rx, ry, ringPx, ringPx, 12);
       ctx.fill();
       try {
-        const img = new Image();
-        img.src = logoUrl;
-        if (img.complete && img.naturalWidth > 0) {
-          ctx.drawImage(img, cx - logoPx / 2, cy - logoPx / 2, logoPx, logoPx);
-        }
+        const img = await loadImg(logoUrl);
+        ctx.drawImage(img, cx - logoPx / 2, cy - logoPx / 2, logoPx, logoPx);
       } catch {
         /* ignore */
       }
