@@ -139,23 +139,23 @@ function FreeQRPage() {
     const accent = preset.accent || preset.fg;
     if (preset.frame === "rounded") {
       ctx.strokeStyle = accent;
-      ctx.lineWidth = 8;
-      roundRect(ctx, 16, 16, w - 32, h - 32, 36);
+      ctx.lineWidth = 8 * scale;
+      roundRect(ctx, 16 * scale, 16 * scale, w - 32 * scale, h - 32 * scale, 36 * scale);
       ctx.stroke();
     } else if (preset.frame === "dotted") {
       ctx.strokeStyle = accent;
-      ctx.lineWidth = 6;
-      ctx.setLineDash([2, 14]);
+      ctx.lineWidth = 6 * scale;
+      ctx.setLineDash([2 * scale, 14 * scale]);
       ctx.lineCap = "round";
-      roundRect(ctx, 20, 20, w - 40, h - 40, 32);
+      roundRect(ctx, 20 * scale, 20 * scale, w - 40 * scale, h - 40 * scale, 32 * scale);
       ctx.stroke();
       ctx.setLineDash([]);
     } else if (preset.frame === "scan") {
       ctx.strokeStyle = accent;
-      ctx.lineWidth = 10;
+      ctx.lineWidth = 10 * scale;
       ctx.lineCap = "round";
-      const L = 60;
-      const m = 24;
+      const L = 60 * scale;
+      const m = 24 * scale;
       const corners: Array<[number, number, number, number]> = [
         [m, m, 1, 1],
         [w - m, m, -1, 1],
