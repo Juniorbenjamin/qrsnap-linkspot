@@ -7,16 +7,51 @@ import type { User } from "@supabase/supabase-js";
 
 export const FREE_LINK_LIMIT = 4;
 
+export type LinkType =
+  | "link"
+  | "header"
+  | "youtube"
+  | "tiktok"
+  | "spotify"
+  | "product"
+  | "gallery"
+  | "testimonial"
+  | "email_capture"
+  | "whatsapp"
+  | "payment"
+  | "booking";
+
 export type LinkItem = {
   id: string;
   title: string;
   url: string;
   position: number;
+  link_type: LinkType;
+  icon: string;
+  thumbnail_url: string;
+  color: string;
+  is_featured: boolean;
+  is_pinned: boolean;
+  metadata: Record<string, any>;
 };
 
-export type Theme = "midnight" | "sunset" | "ocean" | "forest" | "minimal";
+export type Theme = "midnight" | "sunset" | "ocean" | "forest" | "minimal" | "aurora" | "noir" | "candy";
 export type ButtonStyle = "rounded" | "pill" | "square" | "outline";
 export type FontWeight = "normal" | "semibold" | "bold";
+export type FontFamily = "inter" | "system" | "poppins" | "playfair" | "space" | "mono";
+
+export type SocialLinks = {
+  instagram?: string;
+  tiktok?: string;
+  youtube?: string;
+  x?: string;
+  linkedin?: string;
+  facebook?: string;
+  whatsapp?: string;
+  email?: string;
+  website?: string;
+  spotify?: string;
+};
 
 export type Profile = {
   id: string;
@@ -35,7 +70,28 @@ export type Profile = {
   button_style: ButtonStyle;
   font_weight: FontWeight;
   logo_url: string;
+  // new
+  is_verified: boolean;
+  tagline: string;
+  cover_url: string;
+  bg_video_url: string;
+  bg_animated: boolean;
+  font_family: FontFamily;
+  social_links: SocialLinks;
+  whatsapp_number: string;
+  booking_url: string;
+  accent_color: string;
 };
+
+export async function subscribeEmail(profileId: string, email: string, name = "") {
+  const { error } = await supabase.from("email_subscribers").insert({
+    profile_id: profileId,
+    email: email.trim().toLowerCase(),
+    name: name.trim(),
+    source: "profile",
+  });
+  if (error) throw error;
+}
 
 export type AnalyticsEvent = {
   id: string;
@@ -145,19 +201,40 @@ export function useMyLinks(profileId: string | undefined) {
     links,
     loading,
     refresh,
-    add: async (title: string, url: string) => {
+    add: async (input: { title: string; url: string } & Partial<Pick<LinkItem, "link_type" | "icon" | "thumbnail_url" | "color" | "is_featured" | "is_pinned" | "metadata">>) => {
       if (!profileId) return;
       const position = links.length;
       const { error } = await supabase
         .from("links")
-        .insert({ profile_id: profileId, title, url, position });
+        .insert({
+          profile_id: profileId,
+          title: input.title,
+          url: input.url,
+          position,
+          link_type: input.link_type ?? "link",
+          icon: input.icon ?? "",
+          thumbnail_url: input.thumbnail_url ?? "",
+          color: input.color ?? "",
+          is_featured: input.is_featured ?? false,
+          is_pinned: input.is_pinned ?? false,
+          metadata: input.metadata ?? {},
+        });
       if (error) throw error;
       await refresh();
     },
-    update: async (id: string, patch: { title?: string; url?: string }) => {
+    update: async (id: string, patch: Partial<LinkItem>) => {
       const { error } = await supabase.from("links").update(patch).eq("id", id);
       if (error) throw error;
       await refresh();
+    },
+    reorder: async (orderedIds: string[]) => {
+      // Optimistic update
+      const map = new Map(links.map((l) => [l.id, l]));
+      const next = orderedIds.map((id, i) => ({ ...(map.get(id) as LinkItem), position: i }));
+      setLinks(next);
+      await Promise.all(
+        orderedIds.map((id, i) => supabase.from("links").update({ position: i }).eq("id", id)),
+      );
     },
     remove: async (id: string) => {
       const { error } = await supabase.from("links").delete().eq("id", id);
@@ -280,5 +357,29 @@ export const themes: Record<Theme, { name: string; bg: string; card: string; tex
     text: "#111111",
     muted: "#666",
     accent: "#111",
+  },
+  aurora: {
+    name: "Aurora",
+    bg: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
+    card: "rgba(255,255,255,0.14)",
+    text: "#ffffff",
+    muted: "rgba(255,255,255,0.82)",
+    accent: "#ffffff",
+  },
+  noir: {
+    name: "Noir",
+    bg: "linear-gradient(180deg, #000000 0%, #1a1a1a 100%)",
+    card: "rgba(255,255,255,0.06)",
+    text: "#ffffff",
+    muted: "rgba(255,255,255,0.65)",
+    accent: "#ffffff",
+  },
+  candy: {
+    name: "Candy",
+    bg: "linear-gradient(135deg, #ffecd2 0%, #fcb69f 50%, #ff9a9e 100%)",
+    card: "rgba(255,255,255,0.55)",
+    text: "#1a1a1a",
+    muted: "rgba(0,0,0,0.6)",
+    accent: "#1a1a1a",
   },
 };

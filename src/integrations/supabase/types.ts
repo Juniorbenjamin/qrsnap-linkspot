@@ -14,28 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
-      links: {
+      email_subscribers: {
         Row: {
           created_at: string
+          email: string
           id: string
+          name: string
+          profile_id: string
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name?: string
+          profile_id: string
+          source?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          profile_id?: string
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_subscribers_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      links: {
+        Row: {
+          color: string
+          created_at: string
+          icon: string
+          id: string
+          is_featured: boolean
+          is_pinned: boolean
+          link_type: string
+          metadata: Json
           position: number
           profile_id: string
+          thumbnail_url: string
           title: string
           url: string
         }
         Insert: {
+          color?: string
           created_at?: string
+          icon?: string
           id?: string
+          is_featured?: boolean
+          is_pinned?: boolean
+          link_type?: string
+          metadata?: Json
           position?: number
           profile_id: string
+          thumbnail_url?: string
           title: string
           url: string
         }
         Update: {
+          color?: string
           created_at?: string
+          icon?: string
           id?: string
+          is_featured?: boolean
+          is_pinned?: boolean
+          link_type?: string
+          metadata?: Json
           position?: number
           profile_id?: string
+          thumbnail_url?: string
           title?: string
           url?: string
         }
@@ -84,64 +140,94 @@ export type Database = {
       }
       profiles: {
         Row: {
+          accent_color: string
           avatar_emoji: string
+          bg_animated: boolean
           bg_color: string
+          bg_video_url: string
           bio: string
+          booking_url: string
           button_color: string
           button_style: string
           button_text_color: string
+          cover_url: string
           created_at: string
           display_name: string
+          font_family: string
           font_weight: string
           id: string
           is_pro: boolean
+          is_verified: boolean
           logo_text: string
           logo_url: string
           qr_bg: string
           qr_color: string
+          social_links: Json
+          tagline: string
           theme: string
           updated_at: string
           username: string
+          whatsapp_number: string
         }
         Insert: {
+          accent_color?: string
           avatar_emoji?: string
+          bg_animated?: boolean
           bg_color?: string
+          bg_video_url?: string
           bio?: string
+          booking_url?: string
           button_color?: string
           button_style?: string
           button_text_color?: string
+          cover_url?: string
           created_at?: string
           display_name?: string
+          font_family?: string
           font_weight?: string
           id: string
           is_pro?: boolean
+          is_verified?: boolean
           logo_text?: string
           logo_url?: string
           qr_bg?: string
           qr_color?: string
+          social_links?: Json
+          tagline?: string
           theme?: string
           updated_at?: string
           username: string
+          whatsapp_number?: string
         }
         Update: {
+          accent_color?: string
           avatar_emoji?: string
+          bg_animated?: boolean
           bg_color?: string
+          bg_video_url?: string
           bio?: string
+          booking_url?: string
           button_color?: string
           button_style?: string
           button_text_color?: string
+          cover_url?: string
           created_at?: string
           display_name?: string
+          font_family?: string
           font_weight?: string
           id?: string
           is_pro?: boolean
+          is_verified?: boolean
           logo_text?: string
           logo_url?: string
           qr_bg?: string
           qr_color?: string
+          social_links?: Json
+          tagline?: string
           theme?: string
           updated_at?: string
           username?: string
+          whatsapp_number?: string
         }
         Relationships: []
       }
