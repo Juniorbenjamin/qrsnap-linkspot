@@ -7,16 +7,51 @@ import type { User } from "@supabase/supabase-js";
 
 export const FREE_LINK_LIMIT = 4;
 
+export type LinkType =
+  | "link"
+  | "header"
+  | "youtube"
+  | "tiktok"
+  | "spotify"
+  | "product"
+  | "gallery"
+  | "testimonial"
+  | "email_capture"
+  | "whatsapp"
+  | "payment"
+  | "booking";
+
 export type LinkItem = {
   id: string;
   title: string;
   url: string;
   position: number;
+  link_type: LinkType;
+  icon: string;
+  thumbnail_url: string;
+  color: string;
+  is_featured: boolean;
+  is_pinned: boolean;
+  metadata: Record<string, any>;
 };
 
-export type Theme = "midnight" | "sunset" | "ocean" | "forest" | "minimal";
+export type Theme = "midnight" | "sunset" | "ocean" | "forest" | "minimal" | "aurora" | "noir" | "candy";
 export type ButtonStyle = "rounded" | "pill" | "square" | "outline";
 export type FontWeight = "normal" | "semibold" | "bold";
+export type FontFamily = "inter" | "system" | "poppins" | "playfair" | "space" | "mono";
+
+export type SocialLinks = {
+  instagram?: string;
+  tiktok?: string;
+  youtube?: string;
+  x?: string;
+  linkedin?: string;
+  facebook?: string;
+  whatsapp?: string;
+  email?: string;
+  website?: string;
+  spotify?: string;
+};
 
 export type Profile = {
   id: string;
@@ -35,7 +70,28 @@ export type Profile = {
   button_style: ButtonStyle;
   font_weight: FontWeight;
   logo_url: string;
+  // new
+  is_verified: boolean;
+  tagline: string;
+  cover_url: string;
+  bg_video_url: string;
+  bg_animated: boolean;
+  font_family: FontFamily;
+  social_links: SocialLinks;
+  whatsapp_number: string;
+  booking_url: string;
+  accent_color: string;
 };
+
+export async function subscribeEmail(profileId: string, email: string, name = "") {
+  const { error } = await supabase.from("email_subscribers").insert({
+    profile_id: profileId,
+    email: email.trim().toLowerCase(),
+    name: name.trim(),
+    source: "profile",
+  });
+  if (error) throw error;
+}
 
 export type AnalyticsEvent = {
   id: string;
