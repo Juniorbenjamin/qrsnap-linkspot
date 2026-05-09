@@ -262,41 +262,38 @@ function Dashboard() {
 
             <section className="rounded-2xl border border-border bg-card p-6 shadow-soft">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Your links</h2>
+                <div>
+                  <h2 className="text-lg font-semibold">Your blocks</h2>
+                  <p className="text-xs text-muted-foreground">Drag to reorder. Pinned blocks always stay on top.</p>
+                </div>
                 <span className="text-sm text-muted-foreground">{links.length} {!profile.is_pro && `/ ${FREE_LINK_LIMIT}`}</span>
               </div>
               {links.length === 0 ? (
                 <div className="py-8 text-center text-sm text-muted-foreground">
-                  No links yet. <Link to="/links/$id" params={{ id: "new" }} className="font-medium text-primary hover:underline">Add your first one</Link>
+                  No blocks yet. <Link to="/links/$id" params={{ id: "new" }} className="font-medium text-primary hover:underline">Add your first one</Link>
                 </div>
               ) : (
-                <ul className="space-y-2">
-                  {links.map((link) => (
-                    <li key={link.id} className="flex items-center gap-3 rounded-xl border border-border bg-background px-4 py-3">
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate font-medium">{link.title}</p>
-                        <p className="truncate text-xs text-muted-foreground">{link.url}</p>
-                      </div>
-                      <Button asChild variant="ghost" size="icon">
-                        <Link to="/links/$id" params={{ id: link.id }}><Pencil className="h-4 w-4" /></Link>
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleRemove(link.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
+                <SortableLinks
+                  links={links}
+                  clicksByLink={clicksByLink}
+                  onReorder={reorder}
+                  onRemove={handleRemove}
+                  onTogglePin={(id, v) => updateLink(id, { is_pinned: v }).catch(() => toast.error("Save failed"))}
+                  onToggleFeatured={(id, v) => updateLink(id, { is_featured: v }).catch(() => toast.error("Save failed"))}
+                />
               )}
               {!profile.is_pro && links.length >= FREE_LINK_LIMIT && (
                 <div className="mt-4 rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm">
-                  <p className="font-medium">You've hit the free limit of {FREE_LINK_LIMIT} links.</p>
-                  <p className="mt-1 text-muted-foreground">Upgrade to Pro for unlimited links and more.</p>
+                  <p className="font-medium">You've hit the free limit of {FREE_LINK_LIMIT} blocks.</p>
+                  <p className="mt-1 text-muted-foreground">Upgrade to Pro for unlimited blocks and more.</p>
                   <Button asChild variant="brand" size="sm" className="mt-3">
                     <Link to="/pricing">Upgrade to Pro</Link>
                   </Button>
                 </div>
               )}
             </section>
+
+            <BrandingSection profile={profile} update={update} />
           </div>
 
           <aside className="space-y-4">
