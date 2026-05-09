@@ -57,8 +57,8 @@ function Home() {
 
         {/* HERO */}
         <section className="relative overflow-hidden bg-gradient-hero">
-          <div className="mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-6 md:py-20 lg:grid-cols-2 lg:items-center lg:py-24">
-            <div className="flex flex-col items-start gap-6">
+          <div className="mx-auto flex max-w-4xl flex-col items-center px-4 py-14 text-center sm:px-6 md:py-20 lg:py-24">
+            <div className="flex flex-col items-center gap-6">
               <div className="flex flex-wrap items-center gap-3">
                 <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
                   <span className="relative flex h-2 w-2">
@@ -107,28 +107,6 @@ function Home() {
               </div>
             </div>
 
-            {/* Phone mockup */}
-            <div className="relative mx-auto flex items-center justify-center">
-              <div className="absolute -inset-8 rounded-full bg-gradient-brand opacity-20 blur-3xl" />
-              <div className="relative flex flex-col items-center gap-6 rounded-3xl border border-border bg-card/80 p-8 shadow-elevated backdrop-blur-xl">
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-brand text-3xl shadow-glow">
-                  ✂️
-                </div>
-                <div className="text-center">
-                  <h3 className="text-xl font-bold">Mike's Barber Shop</h3>
-                  <p className="text-sm text-muted-foreground">Book your fresh cut today</p>
-                </div>
-                <div className="flex w-full flex-col gap-2">
-                  {["📅 Book Appointment", "📸 Instagram", "📍 Find Us", "⭐ Leave a Review"].map((l) => (
-                    <div key={l} className="rounded-xl border border-border bg-background px-4 py-3 text-center text-sm font-medium shadow-soft">
-                      {l}
-                    </div>
-                  ))}
-                </div>
-                <QRPreview value="https://qrlinkspot.app/mikes-barber" size={140} showDownload={false} />
-                <p className="text-xs font-medium text-success">↑ Mike got 38 new bookings this week</p>
-              </div>
-            </div>
           </div>
         </section>
 
