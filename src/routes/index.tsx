@@ -57,8 +57,8 @@ function Home() {
 
         {/* HERO */}
         <section className="relative overflow-hidden bg-gradient-hero">
-          <div className="mx-auto grid max-w-7xl gap-12 px-4 py-14 sm:px-6 md:py-20 lg:grid-cols-2 lg:items-center lg:py-24">
-            <div className="flex flex-col items-start gap-6">
+          <div className="mx-auto flex max-w-4xl flex-col items-center px-4 py-14 text-center sm:px-6 md:py-20 lg:py-24">
+            <div className="flex flex-col items-center gap-6">
               <div className="flex flex-wrap items-center gap-3">
                 <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur">
                   <span className="relative flex h-2 w-2">
