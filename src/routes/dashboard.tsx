@@ -1,19 +1,23 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { QRPreview } from "@/components/QRPreview";
-import { useAuth, useMyProfile, useMyLinks, useMyAnalytics, FREE_LINK_LIMIT, themes, type Theme, type ButtonStyle, type FontWeight } from "@/lib/store";
+import { useAuth, useMyProfile, useMyLinks, useMyAnalytics, FREE_LINK_LIMIT, themes, type Theme, type ButtonStyle, type FontWeight, type FontFamily, type LinkItem, type SocialLinks } from "@/lib/store";
 import { useSubscription } from "@/hooks/useSubscription";
 import { createCustomerPortalSession } from "@/server/payments.functions";
 import { getPaddleEnvironment } from "@/lib/paddle";
 import { publicProfileUrl } from "@/lib/public-url";
-import { Plus, ExternalLink, Trash2, Eye, MousePointerClick, Crown, Pencil, QrCode, CreditCard, Loader2, Upload, X } from "lucide-react";
+import { Plus, ExternalLink, Trash2, Eye, MousePointerClick, Crown, Pencil, QrCode, CreditCard, Loader2, Upload, X, GripVertical, Pin, Star, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
