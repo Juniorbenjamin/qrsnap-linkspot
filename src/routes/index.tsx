@@ -24,6 +24,7 @@ import {
   BarChart3,
 } from "lucide-react";
 import { MockupCarousel } from "@/components/MockupCarousel";
+import { LinkInBioSection } from "@/components/LinkInBioSection";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -161,6 +162,9 @@ function Home() {
 
         {/* MOCKUP CAROUSEL */}
         <MockupCarousel />
+
+        {/* LINK IN BIO */}
+        <LinkInBioSection />
 
         {/* USE CASES — internal SEO links */}
         <section className="bg-muted/30 py-16">
