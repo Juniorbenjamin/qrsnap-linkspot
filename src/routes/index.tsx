@@ -107,28 +107,6 @@ function Home() {
               </div>
             </div>
 
-            {/* Phone mockup */}
-            <div className="relative mx-auto flex items-center justify-center">
-              <div className="absolute -inset-8 rounded-full bg-gradient-brand opacity-20 blur-3xl" />
-              <div className="relative flex flex-col items-center gap-6 rounded-3xl border border-border bg-card/80 p-8 shadow-elevated backdrop-blur-xl">
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-brand text-3xl shadow-glow">
-                  ✂️
-                </div>
-                <div className="text-center">
-                  <h3 className="text-xl font-bold">Mike's Barber Shop</h3>
-                  <p className="text-sm text-muted-foreground">Book your fresh cut today</p>
-                </div>
-                <div className="flex w-full flex-col gap-2">
-                  {["📅 Book Appointment", "📸 Instagram", "📍 Find Us", "⭐ Leave a Review"].map((l) => (
-                    <div key={l} className="rounded-xl border border-border bg-background px-4 py-3 text-center text-sm font-medium shadow-soft">
-                      {l}
-                    </div>
-                  ))}
-                </div>
-                <QRPreview value="https://qrlinkspot.app/mikes-barber" size={140} showDownload={false} />
-                <p className="text-xs font-medium text-success">↑ Mike got 38 new bookings this week</p>
-              </div>
-            </div>
           </div>
         </section>
 
