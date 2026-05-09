@@ -467,3 +467,212 @@ function LogoUploader({ userId, currentUrl, onChange }: { userId: string; curren
     </div>
   );
 }
+
+function SortableLinks({
+  links, clicksByLink, onReorder, onRemove, onTogglePin, onToggleFeatured,
+}: {
+  links: LinkItem[];
+  clicksByLink: Record<string, number>;
+  onReorder: (orderedIds: string[]) => Promise<void>;
+  onRemove: (id: string) => void;
+  onTogglePin: (id: string, v: boolean) => void;
+  onToggleFeatured: (id: string, v: boolean) => void;
+}) {
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
+  const ids = links.map((l) => l.id);
+  const maxClicks = Math.max(0, ...Object.values(clicksByLink));
+
+  const onDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    const oldIdx = ids.indexOf(String(active.id));
+    const newIdx = ids.indexOf(String(over.id));
+    if (oldIdx < 0 || newIdx < 0) return;
+    const next = arrayMove(ids, oldIdx, newIdx);
+    onReorder(next);
+  };
+
+  return (
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+      <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+        <ul className="space-y-2">
+          {links.map((link) => (
+            <SortableLinkRow
+              key={link.id}
+              link={link}
+              clicks={clicksByLink[link.id] || 0}
+              isTop={maxClicks > 0 && (clicksByLink[link.id] || 0) === maxClicks}
+              onRemove={onRemove}
+              onTogglePin={onTogglePin}
+              onToggleFeatured={onToggleFeatured}
+            />
+          ))}
+        </ul>
+      </SortableContext>
+    </DndContext>
+  );
+}
+
+function SortableLinkRow({
+  link, clicks, isTop, onRemove, onTogglePin, onToggleFeatured,
+}: {
+  link: LinkItem;
+  clicks: number;
+  isTop: boolean;
+  onRemove: (id: string) => void;
+  onTogglePin: (id: string, v: boolean) => void;
+  onToggleFeatured: (id: string, v: boolean) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: link.id });
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.6 : 1 };
+  return (
+    <li ref={setNodeRef} style={style} className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-3">
+      <button {...attributes} {...listeners} className="cursor-grab touch-none rounded p-1 text-muted-foreground hover:bg-muted active:cursor-grabbing" aria-label="Drag to reorder">
+        <GripVertical className="h-4 w-4" />
+      </button>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-1.5">
+          {link.icon && <span className="text-sm">{link.icon}</span>}
+          <p className="truncate text-sm font-medium">{link.title || <span className="italic text-muted-foreground">(untitled)</span>}</p>
+          {link.is_pinned && <Pin className="h-3 w-3 text-primary" />}
+          {link.is_featured && <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />}
+          {isTop && <span className="rounded-full bg-yellow-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-yellow-900">Top</span>}
+        </div>
+        <p className="truncate text-xs text-muted-foreground">
+          {link.link_type !== "link" && <span className="mr-1.5 rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase tracking-wide">{link.link_type.replace("_", " ")}</span>}
+          {link.url || <span className="italic">no url</span>}
+          {clicks > 0 && <span className="ml-2 text-foreground">· {clicks} click{clicks === 1 ? "" : "s"}</span>}
+        </p>
+      </div>
+      <Button variant="ghost" size="icon" onClick={() => onTogglePin(link.id, !link.is_pinned)} aria-label="Pin">
+        <Pin className={`h-4 w-4 ${link.is_pinned ? "fill-primary text-primary" : ""}`} />
+      </Button>
+      <Button variant="ghost" size="icon" onClick={() => onToggleFeatured(link.id, !link.is_featured)} aria-label="Feature">
+        <Star className={`h-4 w-4 ${link.is_featured ? "fill-yellow-500 text-yellow-500" : ""}`} />
+      </Button>
+      <Button asChild variant="ghost" size="icon">
+        <Link to="/links/$id" params={{ id: link.id }}><Pencil className="h-4 w-4" /></Link>
+      </Button>
+      <Button variant="ghost" size="icon" onClick={() => onRemove(link.id)}>
+        <Trash2 className="h-4 w-4 text-destructive" />
+      </Button>
+    </li>
+  );
+}
+
+const FONT_OPTIONS: { id: FontFamily; name: string; className: string }[] = [
+  { id: "inter",    name: "Inter",     className: "" },
+  { id: "system",   name: "System",    className: "font-sans" },
+  { id: "poppins",  name: "Poppins",   className: "font-poppins" },
+  { id: "playfair", name: "Playfair",  className: "font-playfair" },
+  { id: "space",    name: "Space",     className: "font-space" },
+  { id: "mono",     name: "Mono",      className: "font-mono-display" },
+];
+
+const SOCIAL_KEYS: { key: keyof SocialLinks; label: string; placeholder: string }[] = [
+  { key: "instagram", label: "Instagram", placeholder: "yourhandle" },
+  { key: "tiktok",    label: "TikTok",    placeholder: "yourhandle" },
+  { key: "youtube",   label: "YouTube",   placeholder: "@yourchannel" },
+  { key: "x",         label: "X",         placeholder: "yourhandle" },
+  { key: "facebook",  label: "Facebook",  placeholder: "yourpage" },
+  { key: "linkedin",  label: "LinkedIn",  placeholder: "yourname" },
+  { key: "spotify",   label: "Spotify",   placeholder: "spotify-id" },
+  { key: "website",   label: "Website",   placeholder: "yoursite.com" },
+  { key: "email",     label: "Email",     placeholder: "you@email.com" },
+];
+
+function BrandingSection({ profile, update }: { profile: any; update: (patch: any) => Promise<void> }) {
+  const social: SocialLinks = profile.social_links || {};
+  const setSocial = (key: keyof SocialLinks, val: string) =>
+    update({ social_links: { ...social, [key]: val } }).catch(() => toast.error("Save failed"));
+
+  return (
+    <section className="rounded-2xl border border-border bg-card p-6 shadow-soft">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Branding & contact</h2>
+        <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2 sm:col-span-2">
+          <Label>Tagline</Label>
+          <Input defaultValue={profile.tagline} placeholder="Local barber · Brooklyn, NY"
+            onBlur={(e) => e.target.value !== profile.tagline && update({ tagline: e.target.value }).catch(() => toast.error("Save failed"))} />
+        </div>
+
+        <div className="space-y-2">
+          <Label>WhatsApp number</Label>
+          <Input defaultValue={profile.whatsapp_number} placeholder="+1 555 123 4567"
+            onBlur={(e) => e.target.value !== profile.whatsapp_number && update({ whatsapp_number: e.target.value }).catch(() => toast.error("Save failed"))} />
+        </div>
+        <div className="space-y-2">
+          <Label>Booking URL</Label>
+          <Input defaultValue={profile.booking_url} placeholder="https://calendly.com/you"
+            onBlur={(e) => e.target.value !== profile.booking_url && update({ booking_url: e.target.value }).catch(() => toast.error("Save failed"))} />
+        </div>
+
+        <div className="space-y-2 sm:col-span-2">
+          <Label>Background image URL (optional)</Label>
+          <Input defaultValue={profile.cover_url} placeholder="https://..."
+            onBlur={(e) => e.target.value !== profile.cover_url && update({ cover_url: e.target.value }).catch(() => toast.error("Save failed"))} />
+        </div>
+
+        <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 px-4 py-3 sm:col-span-2">
+          <div>
+            <p className="text-sm font-medium">Animated gradient background</p>
+            <p className="text-xs text-muted-foreground">Subtle moving color wash behind your profile.</p>
+          </div>
+          <Switch checked={!!profile.bg_animated} onCheckedChange={(v) => update({ bg_animated: v }).catch(() => toast.error("Save failed"))} />
+        </div>
+
+        <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 px-4 py-3 sm:col-span-2">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 fill-blue-500 text-white" />
+            <div>
+              <p className="text-sm font-medium">Verified badge {!profile.is_pro && <span className="ml-1 text-xs text-primary">(Pro)</span>}</p>
+              <p className="text-xs text-muted-foreground">Show a blue check next to your name.</p>
+            </div>
+          </div>
+          <Switch
+            checked={!!profile.is_verified}
+            disabled={!profile.is_pro}
+            onCheckedChange={(v) => update({ is_verified: v }).catch(() => toast.error("Save failed"))}
+          />
+        </div>
+      </div>
+
+      <div className="mt-6">
+        <Label className="mb-2 block">Font family</Label>
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+          {FONT_OPTIONS.map((f) => {
+            const active = profile.font_family === f.id;
+            return (
+              <button key={f.id} type="button"
+                onClick={() => update({ font_family: f.id }).catch(() => toast.error("Save failed"))}
+                className={`rounded-xl border-2 p-3 text-center transition-all ${f.className} ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}>
+                <span className="text-base">Aa</span>
+                <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{f.name}</p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-6">
+        <Label className="mb-2 block">Social handles</Label>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {SOCIAL_KEYS.map(({ key, label, placeholder }) => (
+            <div key={key} className="space-y-1">
+              <Label className="text-xs">{label}</Label>
+              <Input defaultValue={social[key] ?? ""} placeholder={placeholder}
+                onBlur={(e) => {
+                  const v = e.target.value.trim();
+                  if (v !== (social[key] ?? "")) setSocial(key, v);
+                }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
