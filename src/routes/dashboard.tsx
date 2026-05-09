@@ -34,6 +34,13 @@ function Dashboard() {
   const { events } = useMyAnalytics(profile?.id);
   const { subscription, isActive, cancelAtPeriodEnd, isPastDue } = useSubscription();
   const [portalLoading, setPortalLoading] = useState(false);
+  const clicksByLink = useMemo(() => {
+    const map: Record<string, number> = {};
+    events.forEach((e) => {
+      if (e.event_type === "click" && e.link_id) map[e.link_id] = (map[e.link_id] || 0) + 1;
+    });
+    return map;
+  }, [events]);
 
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/login" });
@@ -79,14 +86,6 @@ function Dashboard() {
   const views = events.filter((e) => e.event_type === "view").length;
   const scans = events.filter((e) => e.event_type === "scan").length;
   const clicks = events.filter((e) => e.event_type === "click").length;
-  const clicksByLink = useMemo(() => {
-    const map: Record<string, number> = {};
-    events.forEach((e) => {
-      if (e.event_type === "click" && e.link_id) map[e.link_id] = (map[e.link_id] || 0) + 1;
-    });
-    return map;
-  }, [events]);
-
   const publicUrl = publicProfileUrl(profile.username);
   const qrTarget = `${publicUrl}?src=qr`;
   const linksLeft = profile.is_pro ? "∞" : Math.max(0, FREE_LINK_LIMIT - links.length);
