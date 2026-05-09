@@ -201,19 +201,40 @@ export function useMyLinks(profileId: string | undefined) {
     links,
     loading,
     refresh,
-    add: async (title: string, url: string) => {
+    add: async (input: { title: string; url: string } & Partial<Pick<LinkItem, "link_type" | "icon" | "thumbnail_url" | "color" | "is_featured" | "is_pinned" | "metadata">>) => {
       if (!profileId) return;
       const position = links.length;
       const { error } = await supabase
         .from("links")
-        .insert({ profile_id: profileId, title, url, position });
+        .insert({
+          profile_id: profileId,
+          title: input.title,
+          url: input.url,
+          position,
+          link_type: input.link_type ?? "link",
+          icon: input.icon ?? "",
+          thumbnail_url: input.thumbnail_url ?? "",
+          color: input.color ?? "",
+          is_featured: input.is_featured ?? false,
+          is_pinned: input.is_pinned ?? false,
+          metadata: input.metadata ?? {},
+        });
       if (error) throw error;
       await refresh();
     },
-    update: async (id: string, patch: { title?: string; url?: string }) => {
+    update: async (id: string, patch: Partial<LinkItem>) => {
       const { error } = await supabase.from("links").update(patch).eq("id", id);
       if (error) throw error;
       await refresh();
+    },
+    reorder: async (orderedIds: string[]) => {
+      // Optimistic update
+      const map = new Map(links.map((l) => [l.id, l]));
+      const next = orderedIds.map((id, i) => ({ ...(map.get(id) as LinkItem), position: i }));
+      setLinks(next);
+      await Promise.all(
+        orderedIds.map((id, i) => supabase.from("links").update({ position: i }).eq("id", id)),
+      );
     },
     remove: async (id: string) => {
       const { error } = await supabase.from("links").delete().eq("id", id);
