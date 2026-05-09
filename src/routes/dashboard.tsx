@@ -30,7 +30,7 @@ function Dashboard() {
   const search = useSearch({ from: "/dashboard" });
   const { user, loading: authLoading } = useAuth();
   const { profile, loading: profileLoading, update, refresh } = useMyProfile();
-  const { links, remove } = useMyLinks(profile?.id);
+  const { links, remove, reorder, update: updateLink } = useMyLinks(profile?.id);
   const { events } = useMyAnalytics(profile?.id);
   const { subscription, isActive, cancelAtPeriodEnd, isPastDue } = useSubscription();
   const [portalLoading, setPortalLoading] = useState(false);
