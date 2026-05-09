@@ -337,4 +337,28 @@ export const themes: Record<Theme, { name: string; bg: string; card: string; tex
     muted: "#666",
     accent: "#111",
   },
+  aurora: {
+    name: "Aurora",
+    bg: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
+    card: "rgba(255,255,255,0.14)",
+    text: "#ffffff",
+    muted: "rgba(255,255,255,0.82)",
+    accent: "#ffffff",
+  },
+  noir: {
+    name: "Noir",
+    bg: "linear-gradient(180deg, #000000 0%, #1a1a1a 100%)",
+    card: "rgba(255,255,255,0.06)",
+    text: "#ffffff",
+    muted: "rgba(255,255,255,0.65)",
+    accent: "#ffffff",
+  },
+  candy: {
+    name: "Candy",
+    bg: "linear-gradient(135deg, #ffecd2 0%, #fcb69f 50%, #ff9a9e 100%)",
+    card: "rgba(255,255,255,0.55)",
+    text: "#1a1a1a",
+    muted: "rgba(0,0,0,0.6)",
+    accent: "#1a1a1a",
+  },
 };
