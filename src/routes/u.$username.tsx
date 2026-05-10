@@ -203,33 +203,3 @@ function ProfileSkeleton() {
     </div>
   );
 }
-function renderBlock(link: LinkItem, style: any, profileId: string, onClick: () => void, isTop: boolean) {
-  switch (link.link_type) {
-    case "header":        return <HeaderBlock link={link} color={style.buttonText} />;
-    case "youtube":       return <YouTubeBlock link={link} style={style} />;
-    case "tiktok":        return <TikTokBlock link={link} style={style} />;
-    case "spotify":       return <SpotifyBlock link={link} style={style} />;
-    case "product":       return <ProductBlock link={link} style={style} onClick={onClick} />;
-    case "gallery":       return <GalleryBlock link={link} />;
-    case "testimonial":   return <TestimonialBlock link={link} style={style} />;
-    case "email_capture": return <EmailCaptureBlock link={link} style={style} profileId={profileId} />;
-    case "whatsapp":      return <WhatsAppBlock link={link} style={style} onClick={onClick} />;
-    case "payment":       return <PaymentBlock link={link} style={style} onClick={onClick} />;
-    case "booking":       return <BookingBlock link={link} style={style} onClick={onClick} />;
-    case "link":
-    default:              return <LinkButton link={link} style={style} onClick={onClick} mostClicked={isTop} />;
-  }
-}
-
-function ProfileSkeleton() {
-  return (
-    <div className="w-full animate-pulse">
-      <div className="mx-auto h-28 w-28 rounded-full bg-white/10" />
-      <div className="mx-auto mt-5 h-6 w-40 rounded bg-white/10" />
-      <div className="mx-auto mt-2 h-4 w-24 rounded bg-white/10" />
-      <div className="mt-8 space-y-3">
-        {[0,1,2,3].map((i) => <div key={i} className="h-14 w-full rounded-2xl bg-white/10" />)}
-      </div>
-    </div>
-  );
-}
