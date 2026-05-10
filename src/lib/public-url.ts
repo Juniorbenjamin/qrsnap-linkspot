@@ -17,3 +17,9 @@ export const PUBLIC_BASE_URL = `https://project--${PROJECT_ID}.lovable.app`;
 export function publicProfileUrl(username: string): string {
   return `${PUBLIC_BASE_URL}/u/${encodeURIComponent(username)}`;
 }
+
+// Friendly short label shown in the UI (marketing/aspirational).
+// The actual working URL is still publicProfileUrl(username).
+export function shortProfileLabel(username: string): string {
+  return `linkspot.site/${username}`;
+}
