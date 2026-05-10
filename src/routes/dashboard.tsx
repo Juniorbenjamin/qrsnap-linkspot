@@ -6,13 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { QRPreview } from "@/components/QRPreview";
 import { useAuth, useMyProfile, useMyLinks, useMyAnalytics, FREE_LINK_LIMIT, themes, type Theme, type ButtonStyle, type FontWeight, type FontFamily, type LinkItem, type SocialLinks } from "@/lib/store";
 import { useSubscription } from "@/hooks/useSubscription";
 import { createCustomerPortalSession } from "@/server/payments.functions";
 import { getPaddleEnvironment } from "@/lib/paddle";
-import { publicProfileUrl } from "@/lib/public-url";
-import { Plus, ExternalLink, Trash2, Eye, MousePointerClick, Crown, Pencil, QrCode, CreditCard, Loader2, Upload, X, GripVertical, Pin, Star, CheckCircle2 } from "lucide-react";
+import { publicProfileUrl, shortProfileLabel } from "@/lib/public-url";
+import { Plus, ExternalLink, Trash2, Eye, MousePointerClick, Crown, Pencil, QrCode, CreditCard, Loader2, Upload, X, GripVertical, Pin, Star, CheckCircle2, Copy, Link2, Palette, User, BarChart3, Settings as SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
@@ -21,8 +22,11 @@ import { CSS } from "@dnd-kit/utilities";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
-  validateSearch: (s: Record<string, unknown>) => ({ checkout: typeof s.checkout === "string" ? s.checkout : undefined }),
-  head: () => ({ meta: [{ title: "Dashboard — QRLinkSpot" }] }),
+  validateSearch: (s: Record<string, unknown>) => ({
+    checkout: typeof s.checkout === "string" ? s.checkout : undefined,
+    tab: typeof s.tab === "string" ? s.tab : undefined,
+  }),
+  head: () => ({ meta: [{ title: "Dashboard — LinkSpot" }] }),
 });
 
 function Dashboard() {
@@ -34,6 +38,8 @@ function Dashboard() {
   const { events } = useMyAnalytics(profile?.id);
   const { subscription, isActive, cancelAtPeriodEnd, isPastDue } = useSubscription();
   const [portalLoading, setPortalLoading] = useState(false);
+  const [tab, setTab] = useState<string>(search.tab ?? "links");
+
   const clicksByLink = useMemo(() => {
     const map: Record<string, number> = {};
     events.forEach((e) => {
@@ -46,7 +52,6 @@ function Dashboard() {
     if (!authLoading && !user) navigate({ to: "/login" });
   }, [authLoading, user, navigate]);
 
-  // After successful checkout, poll for the webhook to write the subscription row.
   useEffect(() => {
     if (search.checkout !== "success" || !user) return;
     toast.success("Welcome to Pro! Your features are unlocking…");
@@ -87,7 +92,7 @@ function Dashboard() {
   const scans = events.filter((e) => e.event_type === "scan").length;
   const clicks = events.filter((e) => e.event_type === "click").length;
   const publicUrl = publicProfileUrl(profile.username);
-  const qrTarget = `${publicUrl}?src=qr`;
+  const shortLabel = shortProfileLabel(profile.username);
   const linksLeft = profile.is_pro ? "∞" : Math.max(0, FREE_LINK_LIMIT - links.length);
 
   const handleRemove = async (id: string) => {
@@ -95,189 +100,72 @@ function Dashboard() {
     catch (e) { toast.error("Could not remove link"); }
   };
 
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(publicUrl);
+      toast.success("Link copied");
+    } catch { toast.error("Could not copy"); }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Dashboard</h1>
-            <p className="mt-1 text-muted-foreground">Manage your links, QR, and profile.</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button asChild variant="outline">
-              <a href={`/u/${profile.username}`} target="_blank" rel="noreferrer">
-                <ExternalLink className="mr-2 h-4 w-4" /> View public page
-              </a>
-            </Button>
-            {subscription ? (
-              <Button variant="outline" onClick={openPortal} disabled={portalLoading}>
-                {portalLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
-                Manage subscription
+      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
+        {/* Header card */}
+        <div className="mb-6 rounded-3xl border border-border bg-gradient-card p-5 shadow-soft sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Your LinkSpot</p>
+              <h1 className="mt-1 truncate text-xl font-bold tracking-tight sm:text-2xl">{shortLabel}</h1>
+              <p className="mt-1 text-sm text-muted-foreground">{profile.display_name}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={copyLink}>
+                <Copy className="mr-1.5 h-4 w-4" /> Copy link
               </Button>
-            ) : (
-              <Button asChild variant="outline">
-                <Link to="/pricing"><Crown className="mr-2 h-4 w-4" /> Upgrade to Pro</Link>
+              <Button asChild variant="outline" size="sm">
+                <a href={`/u/${profile.username}`} target="_blank" rel="noreferrer">
+                  <ExternalLink className="mr-1.5 h-4 w-4" /> View
+                </a>
               </Button>
-            )}
-            <Button asChild variant="brand">
-              <Link to="/links/$id" params={{ id: "new" }}><Plus className="mr-2 h-4 w-4" /> Add link</Link>
-            </Button>
+              <Button asChild variant="brand" size="sm">
+                <Link to="/links/$id" params={{ id: "new" }}><Plus className="mr-1.5 h-4 w-4" /> Add link</Link>
+              </Button>
+            </div>
           </div>
         </div>
 
         {isPastDue && (
-          <div className="mb-6 rounded-xl border border-orange-300 bg-orange-50 p-4 text-sm text-orange-900">
+          <div className="mb-4 rounded-2xl border border-orange-300 bg-orange-50 p-4 text-sm text-orange-900">
             <strong>Payment failed.</strong> Update your card in the billing portal to keep Pro features.
           </div>
         )}
         {isActive && cancelAtPeriodEnd && subscription?.current_period_end && (
-          <div className="mb-6 rounded-xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
-            Your Pro plan is set to cancel on {new Date(subscription.current_period_end).toLocaleDateString()}. You'll keep Pro features until then.
+          <div className="mb-4 rounded-2xl border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+            Your Pro plan cancels on {new Date(subscription.current_period_end).toLocaleDateString()}.
           </div>
         )}
 
-        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatCard icon={<QrCode className="h-5 w-5" />} label="QR scans" value={scans} />
-          <StatCard icon={<Eye className="h-5 w-5" />} label="Page views" value={views} />
-          <StatCard icon={<MousePointerClick className="h-5 w-5" />} label="Link clicks" value={clicks} />
-          <StatCard icon={<Crown className="h-5 w-5" />} label="Plan" value={profile.is_pro ? "Pro" : "Free"} sub={profile.is_pro ? "Unlimited" : `${linksLeft} links left`} />
-        </div>
+        <Tabs value={tab} onValueChange={setTab} className="w-full">
+          <div className="-mx-4 mb-6 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex h-11 w-auto gap-1 rounded-2xl bg-muted/60 p-1">
+              <TabTrig value="links"      icon={<Link2 className="h-4 w-4" />}      label="Links" />
+              <TabTrig value="appearance" icon={<Palette className="h-4 w-4" />}    label="Appearance" />
+              <TabTrig value="profile"    icon={<User className="h-4 w-4" />}       label="Profile" />
+              <TabTrig value="analytics"  icon={<BarChart3 className="h-4 w-4" />}  label="Analytics" />
+              <TabTrig value="settings"   icon={<SettingsIcon className="h-4 w-4" />} label="Settings" />
+            </TabsList>
+          </div>
 
-        <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
-          <div className="space-y-6">
-            <section className="rounded-2xl border border-border bg-card p-6 shadow-soft">
-              <h2 className="mb-4 text-lg font-semibold">Profile</h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="display">Display name</Label>
-                  <Input id="display" defaultValue={profile.display_name} onBlur={(e) => update({ display_name: e.target.value }).catch(() => toast.error("Save failed"))} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="username">Username</Label>
-                  <Input id="username" defaultValue={profile.username} onBlur={(e) => {
-                    const v = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "");
-                    if (v && v !== profile.username) update({ username: v }).catch(() => toast.error("Username taken"));
-                  }} />
-                </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="bio">Bio</Label>
-                  <Textarea id="bio" defaultValue={profile.bio} rows={2} onBlur={(e) => update({ bio: e.target.value }).catch(() => toast.error("Save failed"))} />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="emoji">Avatar emoji</Label>
-                  <Input id="emoji" defaultValue={profile.avatar_emoji} maxLength={2} onBlur={(e) => update({ avatar_emoji: e.target.value || "✨" }).catch(() => {})} />
-                </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <Label>Logo (shown on your link page & QR)</Label>
-                  <LogoUploader
-                    userId={profile.id}
-                    currentUrl={profile.logo_url}
-                    onChange={(url) => update({ logo_url: url }).catch(() => toast.error("Save failed"))}
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section className="rounded-2xl border border-border bg-card p-6 shadow-soft">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Customize your link page</h2>
-                <a href={`/u/${profile.username}`} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline">
-                  Preview ↗
-                </a>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Theme</Label>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                  {(Object.keys(themes) as Theme[]).map((key) => {
-                    const th = themes[key];
-                    const active = profile.theme === key;
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => update({ theme: key }).catch(() => toast.error("Save failed"))}
-                        className={`group relative overflow-hidden rounded-xl border-2 p-2 text-left transition-all ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}
-                      >
-                        <div className="h-12 w-full rounded-md" style={{ background: th.bg }} />
-                        <p className="mt-2 text-xs font-medium">{th.name}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                <ColorField label="Background color" value={profile.bg_color} onSave={(v) => update({ bg_color: v }).catch(() => toast.error("Save failed"))} />
-                <ColorField label="Button color" value={profile.button_color} onSave={(v) => update({ button_color: v }).catch(() => toast.error("Save failed"))} />
-                <ColorField label="Text color" value={profile.button_text_color} onSave={(v) => update({ button_text_color: v }).catch(() => toast.error("Save failed"))} />
-              </div>
-
-              <div className="mt-6 space-y-2">
-                <Label>Button style</Label>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {(["rounded", "pill", "square", "outline"] as ButtonStyle[]).map((style) => {
-                    const active = profile.button_style === style;
-                    const radius = style === "pill" ? "9999px" : style === "square" ? "6px" : "16px";
-                    return (
-                      <button
-                        key={style}
-                        type="button"
-                        onClick={() => update({ button_style: style }).catch(() => toast.error("Save failed"))}
-                        className={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}
-                      >
-                        <div
-                          className="h-8 w-full bg-primary"
-                          style={{
-                            background: style === "outline" ? "transparent" : undefined,
-                            border: style === "outline" ? "2px solid hsl(var(--primary))" : "none",
-                            borderRadius: radius,
-                          }}
-                        />
-                        <span className="text-xs font-medium capitalize">{style}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="mt-6 space-y-2">
-                <Label>Text boldness</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(["normal", "semibold", "bold"] as FontWeight[]).map((fw) => {
-                    const active = profile.font_weight === fw;
-                    return (
-                      <button
-                        key={fw}
-                        type="button"
-                        onClick={() => update({ font_weight: fw }).catch(() => toast.error("Save failed"))}
-                        className={`rounded-xl border-2 p-3 text-center transition-all ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"} ${fw === "bold" ? "font-bold" : fw === "normal" ? "font-normal" : "font-semibold"}`}
-                      >
-                        Aa <span className="ml-1 text-xs capitalize text-muted-foreground">{fw}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <p className="mt-4 text-xs text-muted-foreground">
-                Custom colors override the theme. Leave a color empty to use the theme default.
-              </p>
-            </section>
-
-            <section className="rounded-2xl border border-border bg-card p-6 shadow-soft">
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold">Your blocks</h2>
-                  <p className="text-xs text-muted-foreground">Drag to reorder. Pinned blocks always stay on top.</p>
-                </div>
-                <span className="text-sm text-muted-foreground">{links.length} {!profile.is_pro && `/ ${FREE_LINK_LIMIT}`}</span>
-              </div>
+          {/* LINKS */}
+          <TabsContent value="links" className="space-y-4">
+            <Section
+              title="Your links"
+              description="Drag to reorder. Pinned links always stay on top."
+              right={<span className="text-xs text-muted-foreground">{links.length}{!profile.is_pro && ` / ${FREE_LINK_LIMIT}`}</span>}
+            >
               {links.length === 0 ? (
-                <div className="py-8 text-center text-sm text-muted-foreground">
-                  No blocks yet. <Link to="/links/$id" params={{ id: "new" }} className="font-medium text-primary hover:underline">Add your first one</Link>
-                </div>
+                <EmptyLinks />
               ) : (
                 <SortableLinks
                   links={links}
@@ -289,50 +177,334 @@ function Dashboard() {
                 />
               )}
               {!profile.is_pro && links.length >= FREE_LINK_LIMIT && (
-                <div className="mt-4 rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm">
-                  <p className="font-medium">You've hit the free limit of {FREE_LINK_LIMIT} blocks.</p>
-                  <p className="mt-1 text-muted-foreground">Upgrade to Pro for unlimited blocks and more.</p>
+                <div className="mt-4 rounded-2xl border border-primary/30 bg-primary/5 p-4 text-sm">
+                  <p className="font-medium">You've hit the free limit of {FREE_LINK_LIMIT} links.</p>
+                  <p className="mt-1 text-muted-foreground">Upgrade to Pro for unlimited links and more.</p>
                   <Button asChild variant="brand" size="sm" className="mt-3">
                     <Link to="/pricing">Upgrade to Pro</Link>
                   </Button>
                 </div>
               )}
-            </section>
+            </Section>
+          </TabsContent>
 
-            <BrandingSection profile={profile} update={update} />
-          </div>
+          {/* APPEARANCE */}
+          <TabsContent value="appearance" className="space-y-4">
+            <AppearanceTab profile={profile} update={update} />
+          </TabsContent>
 
-          <aside className="space-y-4">
-            <div className="rounded-2xl border border-border bg-gradient-card p-6 shadow-soft">
-              <h2 className="mb-4 text-lg font-semibold">Your QR code</h2>
-              <QRPreview
-                value={qrTarget}
-                fgColor={profile.is_pro ? profile.qr_color : "#1a1a2e"}
-                bgColor={profile.is_pro ? profile.qr_bg : "#ffffff"}
-                logoText={profile.is_pro ? profile.logo_text : ""}
-                logoUrl={profile.is_pro ? profile.logo_url : ""}
-              />
-              <p className="mt-4 break-all text-center text-xs text-muted-foreground">{publicUrl}</p>
-              <Button asChild variant="outline" className="mt-4 w-full">
-                <Link to="/qr">Customize QR</Link>
-              </Button>
-            </div>
-          </aside>
-        </div>
+          {/* PROFILE */}
+          <TabsContent value="profile" className="space-y-4">
+            <ProfileTab profile={profile} update={update} />
+          </TabsContent>
+
+          {/* ANALYTICS */}
+          <TabsContent value="analytics" className="space-y-4">
+            <Section title="Your stats" description="Last 30 days of activity.">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <StatCard icon={<Eye className="h-4 w-4" />} label="Page views" value={views} />
+                <StatCard icon={<MousePointerClick className="h-4 w-4" />} label="Link clicks" value={clicks} />
+                <StatCard icon={<QrCode className="h-4 w-4" />} label="QR scans" value={scans} />
+              </div>
+            </Section>
+            <Section title="Top links">
+              {links.length === 0 ? (
+                <p className="py-4 text-center text-sm text-muted-foreground">No links yet.</p>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {links
+                    .map((l) => ({ ...l, clicks: clicksByLink[l.id] || 0 }))
+                    .sort((a, b) => b.clicks - a.clicks)
+                    .slice(0, 8)
+                    .map((l) => (
+                      <li key={l.id} className="flex items-center justify-between gap-3 py-3">
+                        <span className="truncate text-sm">{l.title || <span className="italic text-muted-foreground">(untitled)</span>}</span>
+                        <span className="shrink-0 text-sm font-semibold tabular-nums">{l.clicks}</span>
+                      </li>
+                    ))}
+                </ul>
+              )}
+            </Section>
+          </TabsContent>
+
+          {/* SETTINGS */}
+          <TabsContent value="settings" className="space-y-4">
+            <Section title="Plan" description={profile.is_pro ? "You're on Pro — unlimited everything." : `Free plan · ${linksLeft} links left.`}>
+              <div className="flex flex-wrap items-center gap-2">
+                {subscription ? (
+                  <Button variant="outline" onClick={openPortal} disabled={portalLoading}>
+                    {portalLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
+                    Manage subscription
+                  </Button>
+                ) : (
+                  <Button asChild variant="brand">
+                    <Link to="/pricing"><Crown className="mr-2 h-4 w-4" /> Upgrade to Pro</Link>
+                  </Button>
+                )}
+              </div>
+            </Section>
+
+            <Section title="Your QR code" description="Print on cards, signs, or flyers — it always points to your LinkSpot.">
+              <div className="grid gap-6 sm:grid-cols-[200px_1fr] sm:items-center">
+                <div className="mx-auto w-full max-w-[200px]">
+                  <QRPreview
+                    value={`${publicUrl}?src=qr`}
+                    fgColor={profile.is_pro ? profile.qr_color : "#1a1a2e"}
+                    bgColor={profile.is_pro ? profile.qr_bg : "#ffffff"}
+                    logoText={profile.is_pro ? profile.logo_text : ""}
+                    logoUrl={profile.is_pro ? profile.logo_url : ""}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <p className="break-all text-sm text-muted-foreground">{publicUrl}</p>
+                  <Button asChild variant="outline" size="sm">
+                    <Link to="/qr">Customize QR</Link>
+                  </Button>
+                </div>
+              </div>
+            </Section>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
 }
 
-function StatCard({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: string | number; sub?: string }) {
+function TabTrig({ value, icon, label }: { value: string; icon: React.ReactNode; label: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-gradient-card p-5 shadow-soft">
-      <div className="flex items-center gap-2 text-muted-foreground">{icon}<span className="text-sm font-medium">{label}</span></div>
-      <p className="mt-2 text-3xl font-bold">{value}</p>
-      {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
+    <TabsTrigger value={value} className="gap-1.5 rounded-xl px-3 text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">
+      {icon}
+      <span>{label}</span>
+    </TabsTrigger>
+  );
+}
+
+function Section({ title, description, right, children }: { title: string; description?: string; right?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <section className="rounded-2xl border border-border bg-card p-5 shadow-soft sm:p-6">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold sm:text-lg">{title}</h2>
+          {description && <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">{description}</p>}
+        </div>
+        {right}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function EmptyLinks() {
+  return (
+    <div className="rounded-2xl border border-dashed border-border py-12 text-center">
+      <Link2 className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
+      <p className="text-sm font-medium">No links yet</p>
+      <p className="mt-1 text-xs text-muted-foreground">Add your first link to get started.</p>
+      <Button asChild variant="brand" size="sm" className="mt-4">
+        <Link to="/links/$id" params={{ id: "new" }}><Plus className="mr-1.5 h-4 w-4" /> Add link</Link>
+      </Button>
     </div>
   );
 }
+
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
+  return (
+    <div className="rounded-xl border border-border bg-background p-4">
+      <div className="flex items-center gap-2 text-muted-foreground">{icon}<span className="text-xs font-medium">{label}</span></div>
+      <p className="mt-1.5 text-2xl font-bold tabular-nums">{value}</p>
+    </div>
+  );
+}
+
+/* ---------------- Profile tab ---------------- */
+
+function ProfileTab({ profile, update }: { profile: any; update: (patch: any) => Promise<void> }) {
+  const social: SocialLinks = profile.social_links || {};
+  const setSocial = (key: keyof SocialLinks, val: string) =>
+    update({ social_links: { ...social, [key]: val } }).catch(() => toast.error("Save failed"));
+
+  return (
+    <>
+      <Section title="Profile" description="What people see at the top of your page.">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="display">Display name</Label>
+            <Input id="display" defaultValue={profile.display_name} onBlur={(e) => update({ display_name: e.target.value }).catch(() => toast.error("Save failed"))} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="username">Username</Label>
+            <Input id="username" defaultValue={profile.username} onBlur={(e) => {
+              const v = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "");
+              if (v && v !== profile.username) update({ username: v }).catch(() => toast.error("Username taken"));
+            }} />
+            <p className="text-xs text-muted-foreground">{shortProfileLabel(profile.username)}</p>
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="bio">Bio</Label>
+            <Textarea id="bio" defaultValue={profile.bio} rows={2} onBlur={(e) => update({ bio: e.target.value }).catch(() => toast.error("Save failed"))} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="emoji">Avatar emoji</Label>
+            <Input id="emoji" defaultValue={profile.avatar_emoji} maxLength={2} onBlur={(e) => update({ avatar_emoji: e.target.value || "✨" }).catch(() => {})} />
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <Label>Profile photo</Label>
+            <LogoUploader
+              userId={profile.id}
+              currentUrl={profile.logo_url}
+              onChange={(url) => update({ logo_url: url }).catch(() => toast.error("Save failed"))}
+            />
+          </div>
+        </div>
+      </Section>
+
+      <Section title="Social handles" description="Shown as icons under your name.">
+        <div className="grid gap-3 sm:grid-cols-2">
+          {SOCIAL_KEYS.map(({ key, label, placeholder }) => (
+            <div key={key} className="space-y-1">
+              <Label className="text-xs">{label}</Label>
+              <Input defaultValue={social[key] ?? ""} placeholder={placeholder}
+                onBlur={(e) => {
+                  const v = e.target.value.trim();
+                  if (v !== (social[key] ?? "")) setSocial(key, v);
+                }} />
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Verified badge" description="Show a blue check next to your name.">
+        <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 fill-blue-500 text-white" />
+            <p className="text-sm font-medium">Verified {!profile.is_pro && <span className="ml-1 text-xs text-primary">(Pro)</span>}</p>
+          </div>
+          <Switch
+            checked={!!profile.is_verified}
+            disabled={!profile.is_pro}
+            onCheckedChange={(v) => update({ is_verified: v }).catch(() => toast.error("Save failed"))}
+          />
+        </div>
+      </Section>
+    </>
+  );
+}
+
+/* ---------------- Appearance tab ---------------- */
+
+function AppearanceTab({ profile, update }: { profile: any; update: (patch: any) => Promise<void> }) {
+  return (
+    <>
+      <Section title="Theme">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+          {(Object.keys(themes) as Theme[]).map((key) => {
+            const th = themes[key];
+            const active = profile.theme === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => update({ theme: key }).catch(() => toast.error("Save failed"))}
+                className={`group relative overflow-hidden rounded-xl border-2 p-2 text-left transition-all ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}
+              >
+                <div className="h-12 w-full rounded-md" style={{ background: th.bg }} />
+                <p className="mt-2 text-xs font-medium">{th.name}</p>
+              </button>
+            );
+          })}
+        </div>
+      </Section>
+
+      <Section title="Colors" description="Override the theme. Leave empty to use defaults.">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <ColorField label="Background" value={profile.bg_color} onSave={(v) => update({ bg_color: v }).catch(() => toast.error("Save failed"))} />
+          <ColorField label="Button" value={profile.button_color} onSave={(v) => update({ button_color: v }).catch(() => toast.error("Save failed"))} />
+          <ColorField label="Text" value={profile.button_text_color} onSave={(v) => update({ button_text_color: v }).catch(() => toast.error("Save failed"))} />
+        </div>
+      </Section>
+
+      <Section title="Buttons">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {(["rounded", "pill", "square", "outline"] as ButtonStyle[]).map((style) => {
+            const active = profile.button_style === style;
+            const radius = style === "pill" ? "9999px" : style === "square" ? "6px" : "16px";
+            return (
+              <button
+                key={style}
+                type="button"
+                onClick={() => update({ button_style: style }).catch(() => toast.error("Save failed"))}
+                className={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}
+              >
+                <div
+                  className="h-7 w-full bg-primary"
+                  style={{
+                    background: style === "outline" ? "transparent" : undefined,
+                    border: style === "outline" ? "2px solid hsl(var(--primary))" : "none",
+                    borderRadius: radius,
+                  }}
+                />
+                <span className="text-xs font-medium capitalize">{style}</span>
+              </button>
+            );
+          })}
+        </div>
+      </Section>
+
+      <Section title="Font">
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+          {FONT_OPTIONS.map((f) => {
+            const active = profile.font_family === f.id;
+            return (
+              <button key={f.id} type="button"
+                onClick={() => update({ font_family: f.id }).catch(() => toast.error("Save failed"))}
+                className={`rounded-xl border-2 p-3 text-center transition-all ${f.className} ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}>
+                <span className="text-base">Aa</span>
+                <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{f.name}</p>
+              </button>
+            );
+          })}
+        </div>
+      </Section>
+
+      <Section title="Text weight">
+        <div className="grid grid-cols-3 gap-2">
+          {(["normal", "semibold", "bold"] as FontWeight[]).map((fw) => {
+            const active = profile.font_weight === fw;
+            return (
+              <button
+                key={fw}
+                type="button"
+                onClick={() => update({ font_weight: fw }).catch(() => toast.error("Save failed"))}
+                className={`rounded-xl border-2 p-3 text-center transition-all ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"} ${fw === "bold" ? "font-bold" : fw === "normal" ? "font-normal" : "font-semibold"}`}
+              >
+                Aa <span className="ml-1 text-xs capitalize text-muted-foreground">{fw}</span>
+              </button>
+            );
+          })}
+        </div>
+      </Section>
+
+      <Section title="Background effects">
+        <div className="space-y-3">
+          <div className="space-y-2">
+            <Label>Background image URL (optional)</Label>
+            <Input defaultValue={profile.cover_url} placeholder="https://..."
+              onBlur={(e) => e.target.value !== profile.cover_url && update({ cover_url: e.target.value }).catch(() => toast.error("Save failed"))} />
+          </div>
+          <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 px-4 py-3">
+            <div>
+              <p className="text-sm font-medium">Animated gradient</p>
+              <p className="text-xs text-muted-foreground">Subtle moving color wash.</p>
+            </div>
+            <Switch checked={!!profile.bg_animated} onCheckedChange={(v) => update({ bg_animated: v }).catch(() => toast.error("Save failed"))} />
+          </div>
+        </div>
+      </Section>
+    </>
+  );
+}
+
+/* ---------------- Helpers (unchanged) ---------------- */
 
 function ColorField({ label, value, onSave }: { label: string; value: string; onSave: (v: string) => void }) {
   const [local, setLocal] = useState(value);
@@ -370,70 +542,45 @@ function LogoUploader({ userId, currentUrl, onChange }: { userId: string; curren
   const [uploading, setUploading] = useState(false);
 
   const handleFile = async (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("Logo must be under 2MB");
-      return;
-    }
+    if (!file.type.startsWith("image/")) { toast.error("Please select an image file"); return; }
+    if (file.size > 2 * 1024 * 1024) { toast.error("Photo must be under 2MB"); return; }
     setUploading(true);
     try {
       const ext = file.name.split(".").pop()?.toLowerCase() || "png";
       const path = `${userId}/logo.${ext}`;
-
-      // Remove any previous logo files (different extensions)
       await supabase.storage.from("profile-logos").remove([
-        `${userId}/logo.png`,
-        `${userId}/logo.jpg`,
-        `${userId}/logo.jpeg`,
-        `${userId}/logo.webp`,
-        `${userId}/logo.svg`,
-        `${userId}/logo.gif`,
+        `${userId}/logo.png`, `${userId}/logo.jpg`, `${userId}/logo.jpeg`,
+        `${userId}/logo.webp`, `${userId}/logo.svg`, `${userId}/logo.gif`,
       ]);
-
-      const { error } = await supabase.storage
-        .from("profile-logos")
-        .upload(path, file, { upsert: true, contentType: file.type });
+      const { error } = await supabase.storage.from("profile-logos").upload(path, file, { upsert: true, contentType: file.type });
       if (error) throw error;
-
       const { data } = supabase.storage.from("profile-logos").getPublicUrl(path);
-      // Cache-bust so the new logo shows immediately
       onChange(`${data.publicUrl}?v=${Date.now()}`);
-      toast.success("Logo uploaded");
+      toast.success("Photo uploaded");
     } catch (e: any) {
       toast.error(e?.message ?? "Upload failed");
-    } finally {
-      setUploading(false);
-    }
+    } finally { setUploading(false); }
   };
 
   const handleRemove = async () => {
     setUploading(true);
     try {
       await supabase.storage.from("profile-logos").remove([
-        `${userId}/logo.png`,
-        `${userId}/logo.jpg`,
-        `${userId}/logo.jpeg`,
-        `${userId}/logo.webp`,
-        `${userId}/logo.svg`,
-        `${userId}/logo.gif`,
+        `${userId}/logo.png`, `${userId}/logo.jpg`, `${userId}/logo.jpeg`,
+        `${userId}/logo.webp`, `${userId}/logo.svg`, `${userId}/logo.gif`,
       ]);
       onChange("");
-      toast.success("Logo removed");
-    } finally {
-      setUploading(false);
-    }
+      toast.success("Photo removed");
+    } finally { setUploading(false); }
   };
 
   return (
     <div className="flex items-center gap-4">
-      <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-muted">
+      <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-muted">
         {currentUrl ? (
-          <img src={currentUrl} alt="Logo preview" className="h-full w-full object-contain" />
+          <img src={currentUrl} alt="Profile preview" className="h-full w-full object-cover" />
         ) : (
-          <span className="text-xs text-muted-foreground">No logo</span>
+          <span className="text-xs text-muted-foreground">No photo</span>
         )}
       </div>
       <div className="flex flex-col gap-2">
@@ -461,7 +608,7 @@ function LogoUploader({ userId, currentUrl, onChange }: { userId: string; curren
             <X className="mr-2 h-4 w-4" /> Remove
           </Button>
         )}
-        <p className="text-xs text-muted-foreground">PNG, JPG, WebP or SVG · max 2MB</p>
+        <p className="text-xs text-muted-foreground">PNG, JPG or WebP · max 2MB</p>
       </div>
     </div>
   );
@@ -579,99 +726,3 @@ const SOCIAL_KEYS: { key: keyof SocialLinks; label: string; placeholder: string 
   { key: "website",   label: "Website",   placeholder: "yoursite.com" },
   { key: "email",     label: "Email",     placeholder: "you@email.com" },
 ];
-
-function BrandingSection({ profile, update }: { profile: any; update: (patch: any) => Promise<void> }) {
-  const social: SocialLinks = profile.social_links || {};
-  const setSocial = (key: keyof SocialLinks, val: string) =>
-    update({ social_links: { ...social, [key]: val } }).catch(() => toast.error("Save failed"));
-
-  return (
-    <section className="rounded-2xl border border-border bg-card p-6 shadow-soft">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Branding & contact</h2>
-        <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2 sm:col-span-2">
-          <Label>Tagline</Label>
-          <Input defaultValue={profile.tagline} placeholder="Local barber · Brooklyn, NY"
-            onBlur={(e) => e.target.value !== profile.tagline && update({ tagline: e.target.value }).catch(() => toast.error("Save failed"))} />
-        </div>
-
-        <div className="space-y-2">
-          <Label>WhatsApp number</Label>
-          <Input defaultValue={profile.whatsapp_number} placeholder="+1 555 123 4567"
-            onBlur={(e) => e.target.value !== profile.whatsapp_number && update({ whatsapp_number: e.target.value }).catch(() => toast.error("Save failed"))} />
-        </div>
-        <div className="space-y-2">
-          <Label>Booking URL</Label>
-          <Input defaultValue={profile.booking_url} placeholder="https://calendly.com/you"
-            onBlur={(e) => e.target.value !== profile.booking_url && update({ booking_url: e.target.value }).catch(() => toast.error("Save failed"))} />
-        </div>
-
-        <div className="space-y-2 sm:col-span-2">
-          <Label>Background image URL (optional)</Label>
-          <Input defaultValue={profile.cover_url} placeholder="https://..."
-            onBlur={(e) => e.target.value !== profile.cover_url && update({ cover_url: e.target.value }).catch(() => toast.error("Save failed"))} />
-        </div>
-
-        <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 px-4 py-3 sm:col-span-2">
-          <div>
-            <p className="text-sm font-medium">Animated gradient background</p>
-            <p className="text-xs text-muted-foreground">Subtle moving color wash behind your profile.</p>
-          </div>
-          <Switch checked={!!profile.bg_animated} onCheckedChange={(v) => update({ bg_animated: v }).catch(() => toast.error("Save failed"))} />
-        </div>
-
-        <div className="flex items-center justify-between rounded-xl border border-border bg-muted/40 px-4 py-3 sm:col-span-2">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-4 w-4 fill-blue-500 text-white" />
-            <div>
-              <p className="text-sm font-medium">Verified badge {!profile.is_pro && <span className="ml-1 text-xs text-primary">(Pro)</span>}</p>
-              <p className="text-xs text-muted-foreground">Show a blue check next to your name.</p>
-            </div>
-          </div>
-          <Switch
-            checked={!!profile.is_verified}
-            disabled={!profile.is_pro}
-            onCheckedChange={(v) => update({ is_verified: v }).catch(() => toast.error("Save failed"))}
-          />
-        </div>
-      </div>
-
-      <div className="mt-6">
-        <Label className="mb-2 block">Font family</Label>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-          {FONT_OPTIONS.map((f) => {
-            const active = profile.font_family === f.id;
-            return (
-              <button key={f.id} type="button"
-                onClick={() => update({ font_family: f.id }).catch(() => toast.error("Save failed"))}
-                className={`rounded-xl border-2 p-3 text-center transition-all ${f.className} ${active ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"}`}>
-                <span className="text-base">Aa</span>
-                <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">{f.name}</p>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="mt-6">
-        <Label className="mb-2 block">Social handles</Label>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {SOCIAL_KEYS.map(({ key, label, placeholder }) => (
-            <div key={key} className="space-y-1">
-              <Label className="text-xs">{label}</Label>
-              <Input defaultValue={social[key] ?? ""} placeholder={placeholder}
-                onBlur={(e) => {
-                  const v = e.target.value.trim();
-                  if (v !== (social[key] ?? "")) setSocial(key, v);
-                }} />
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
