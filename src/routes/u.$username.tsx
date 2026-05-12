@@ -1,13 +1,15 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { fetchPublicProfile, themes, trackEvent, type Profile, type LinkItem } from "@/lib/store";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, QrCode, X } from "lucide-react";
 import { SocialIconRow } from "@/components/profile/SocialIconRow";
 import {
   LinkButton, HeaderBlock, YouTubeBlock, TikTokBlock, SpotifyBlock,
   ProductBlock, GalleryBlock, TestimonialBlock, EmailCaptureBlock,
   WhatsAppBlock, PaymentBlock, BookingBlock,
 } from "@/components/profile/Blocks";
+import { QRPreview } from "@/components/QRPreview";
+import { publicProfileUrl } from "@/lib/public-url";
 
 export const Route = createFileRoute("/u/$username")({
   component: PublicProfile,
@@ -32,6 +34,7 @@ function PublicProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showQr, setShowQr] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -108,6 +111,20 @@ function PublicProfile() {
       )}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
 
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
+
+      {/* Floating QR button */}
+      {profile && (
+        <button
+          onClick={() => setShowQr(true)}
+          aria-label="Show QR code"
+          className="tap-bounce fixed right-4 top-4 z-30 flex h-11 w-11 items-center justify-center rounded-full shadow-elevated backdrop-blur-md transition-transform hover:scale-105"
+          style={{ background: "rgba(255,255,255,0.15)", color: textColor, border: "1px solid rgba(255,255,255,0.18)" }}
+        >
+          <QrCode className="h-5 w-5" />
+        </button>
+      )}
+
       <div className="relative mx-auto flex min-h-screen max-w-md flex-col items-center px-5 pb-16 pt-14">
         {loading ? (
           <ProfileSkeleton />
@@ -169,6 +186,22 @@ function PublicProfile() {
           </>
         )}
       </div>
+
+      {/* QR sheet */}
+      {showQr && profile && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-6 backdrop-blur-sm" onClick={() => setShowQr(false)}>
+          <div className="relative w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-elevated" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowQr(false)} aria-label="Close" className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/5 hover:bg-black/10">
+              <X className="h-5 w-5 text-black" />
+            </button>
+            <h2 className="mb-1 text-lg font-bold text-black">Scan to share</h2>
+            <p className="mb-4 text-xs text-black/60">@{profile.username}</p>
+            <div className="mx-auto w-full max-w-[260px]">
+              <QRPreview value={`${publicProfileUrl(profile.username)}?src=qr`} fgColor="#0a0a23" bgColor="#ffffff" logoUrl={profile.logo_url} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
