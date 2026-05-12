@@ -1,13 +1,15 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { fetchPublicProfile, themes, trackEvent, type Profile, type LinkItem } from "@/lib/store";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, QrCode, X } from "lucide-react";
 import { SocialIconRow } from "@/components/profile/SocialIconRow";
 import {
   LinkButton, HeaderBlock, YouTubeBlock, TikTokBlock, SpotifyBlock,
   ProductBlock, GalleryBlock, TestimonialBlock, EmailCaptureBlock,
   WhatsAppBlock, PaymentBlock, BookingBlock,
 } from "@/components/profile/Blocks";
+import { QRPreview } from "@/components/QRPreview";
+import { publicProfileUrl } from "@/lib/public-url";
 
 export const Route = createFileRoute("/u/$username")({
   component: PublicProfile,
