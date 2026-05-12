@@ -112,17 +112,39 @@ function Dashboard() {
       <SiteHeader />
       <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
         {/* Header card */}
-        <div className="mb-6 rounded-3xl border border-border bg-gradient-card p-5 shadow-soft sm:p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Your LinkSpot</p>
-              <h1 className="mt-1 truncate text-xl font-bold tracking-tight sm:text-2xl">{shortLabel}</h1>
-              <p className="mt-1 text-sm text-muted-foreground">{profile.display_name}</p>
+        <div className="mb-6 overflow-hidden rounded-3xl border border-border bg-gradient-card p-5 shadow-soft sm:p-6">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-6 items-center rounded-full bg-primary/10 px-2.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                  Your LinkSpot
+                </span>
+                {profile.is_pro && (
+                  <span className="inline-flex h-6 items-center gap-1 rounded-full bg-amber-100 px-2.5 text-[10px] font-semibold uppercase tracking-wider text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">
+                    <Crown className="h-3 w-3" /> Pro
+                  </span>
+                )}
+              </div>
+
+              <button
+                onClick={copyLink}
+                className="group mt-3 flex w-full items-center gap-2 rounded-2xl border border-border/60 bg-background/60 px-3.5 py-2.5 text-left backdrop-blur transition hover:border-primary/40 hover:bg-background sm:w-auto"
+                aria-label="Copy your LinkSpot URL"
+              >
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-[11px] font-bold text-primary-foreground">
+                  L
+                </span>
+                <span className="min-w-0 flex-1 truncate font-mono text-sm sm:text-base">
+                  <span className="text-muted-foreground">linkspot.site/</span>
+                  <span className="font-semibold text-foreground">{profile.username}</span>
+                </span>
+                <Copy className="h-4 w-4 shrink-0 text-muted-foreground transition group-hover:text-primary" />
+              </button>
+
+              <p className="mt-2 text-xs text-muted-foreground">{profile.display_name}</p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" onClick={copyLink}>
-                <Copy className="mr-1.5 h-4 w-4" /> Copy link
-              </Button>
+
+            <div className="flex flex-wrap gap-2 sm:flex-nowrap">
               <Button asChild variant="outline" size="sm">
                 <a href={`/u/${profile.username}`} target="_blank" rel="noreferrer">
                   <ExternalLink className="mr-1.5 h-4 w-4" /> View
