@@ -34,6 +34,7 @@ function PublicProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showQr, setShowQr] = useState(false);
 
   useEffect(() => {
     let alive = true;
