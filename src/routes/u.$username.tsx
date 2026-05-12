@@ -186,6 +186,22 @@ function PublicProfile() {
           </>
         )}
       </div>
+
+      {/* QR sheet */}
+      {showQr && profile && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-6 backdrop-blur-sm" onClick={() => setShowQr(false)}>
+          <div className="relative w-full max-w-sm rounded-3xl bg-white p-6 text-center shadow-elevated" onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowQr(false)} aria-label="Close" className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/5 hover:bg-black/10">
+              <X className="h-5 w-5 text-black" />
+            </button>
+            <h2 className="mb-1 text-lg font-bold text-black">Scan to share</h2>
+            <p className="mb-4 text-xs text-black/60">@{profile.username}</p>
+            <div className="mx-auto w-full max-w-[260px]">
+              <QRPreview value={`${publicProfileUrl(profile.username)}?src=qr`} fgColor="#0a0a23" bgColor="#ffffff" logoUrl={profile.logo_url} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
