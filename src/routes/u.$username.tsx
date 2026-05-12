@@ -111,6 +111,20 @@ function PublicProfile() {
       )}
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
 
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/40" />
+
+      {/* Floating QR button */}
+      {profile && (
+        <button
+          onClick={() => setShowQr(true)}
+          aria-label="Show QR code"
+          className="tap-bounce fixed right-4 top-4 z-30 flex h-11 w-11 items-center justify-center rounded-full shadow-elevated backdrop-blur-md transition-transform hover:scale-105"
+          style={{ background: "rgba(255,255,255,0.15)", color: textColor, border: "1px solid rgba(255,255,255,0.18)" }}
+        >
+          <QrCode className="h-5 w-5" />
+        </button>
+      )}
+
       <div className="relative mx-auto flex min-h-screen max-w-md flex-col items-center px-5 pb-16 pt-14">
         {loading ? (
           <ProfileSkeleton />
