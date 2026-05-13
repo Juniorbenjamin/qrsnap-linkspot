@@ -19,12 +19,14 @@ export const Route = createFileRoute("/u/$username")({
   head: ({ params }) => ({
     meta: [
       { title: `@${params.username} — LinkSpot` },
-      { name: "description", content: `All of @${params.username}'s links in one place.` },
+      { name: "description", content: `All of @${params.username}'s links, socials and content in one beautiful page on LinkSpot.` },
       { property: "og:title", content: `@${params.username} on LinkSpot` },
       { property: "og:description", content: `Links and socials for @${params.username}.` },
       { property: "og:type", content: "profile" },
+      { property: "og:url", content: `https://qrcodegenerator.life/u/${params.username}` },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: `https://qrcodegenerator.life/u/${params.username}` }],
   }),
 });
 

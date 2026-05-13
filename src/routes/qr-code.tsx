@@ -14,11 +14,11 @@ export const Route = createFileRoute("/qr-code")({
   component: FreeQRPage,
   head: () => ({
     meta: [
-      { title: "Free QR Code Generator — Make a QR Code in Seconds | QRLinkSpot" },
+      { title: "Free QR Code Generator — Make a QR in Seconds | QRLinkSpot" },
       {
         name: "description",
         content:
-          "Free online QR code generator. Paste any URL and download a high-resolution PNG QR code instantly — no signup, no watermark, no credit card. Works for websites, Instagram, menus, WiFi, and business cards.",
+          "Free online QR code generator. Paste any URL and download a high-res PNG instantly — no signup, no watermark. Works for sites, Instagram, menus & WiFi.",
       },
       {
         name: "keywords",

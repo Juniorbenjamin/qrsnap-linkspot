@@ -1,0 +1,32 @@
+# QRLinkSpot
+
+> Free QR code generator and link-in-bio (LinkSpot) page for creators and small businesses. Create a branded QR + profile in 90 seconds.
+
+QRLinkSpot lets anyone generate a custom QR code (with logo, colors, and styles) that points to a hosted link-in-bio page. Built for barbers, restaurants, freelancers, real-estate agents, and creators who want one shareable URL for all their socials, bookings, menus, and contact info.
+
+## Pages
+
+- [Home](/): Free branded QR + link-in-bio overview.
+- [Free QR Code Generator](/qr-code): Create and download a QR code instantly.
+- [Pricing](/pricing): Free forever and Pro plan details.
+- [Blog](/blog): Guides on QR codes and link-in-bio marketing.
+- [Privacy](/privacy): Privacy notice.
+- [Terms](/terms): Terms of service.
+- [Refund Policy](/refund-policy): Refund policy.
+
+## Use cases
+
+- [QR Code for Restaurants](/qr-code-for-restaurant): Branded QR menus.
+- [QR Code for Barbershops](/qr-code-for-barbershop): Bookings, tips, reviews.
+- [QR Code for Business Cards](/qr-code-for-business-card): Digital vCard.
+- [QR Code for Instagram](/qr-code-for-instagram): Grow followers.
+- [QR Code for WiFi](/qr-code-for-wifi): One-tap guest WiFi.
+- [QR Code for Handyman](/qr-code-for-handyman): Lead capture.
+- [QR Code for Real Estate](/qr-code-for-real-estate): Property links.
+- [QR Code for Gyms](/qr-code-for-gym): Trials and signups.
+- [QR Code for Small Business](/qr-code-for-small-business): All-in-one.
+
+## Optional
+
+- [Login](/login)
+- [Sign up](/signup)

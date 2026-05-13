@@ -3,7 +3,7 @@ import { UseCaseLanding, faqJsonLd } from "@/components/UseCaseLanding";
 
 const SITE = "https://qrcodegenerator.life";
 const URL = `${SITE}/qr-code-for-business-card`;
-const TITLE = "QR Code for Business Cards — Digital vCard Generator (Free) | QRLinkSpot";
+const TITLE = "Business Card QR Code — Free vCard Generator | QRLinkSpot";
 const DESC = "Add a custom QR code to your business card so contacts save your info, book you, or follow you in one tap. Free, branded, and editable forever.";
 
 const faqs = [

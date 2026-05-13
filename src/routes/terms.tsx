@@ -14,7 +14,9 @@ export const Route = createFileRoute("/terms")({
       { name: "description", content: `Terms governing your use of ${BRAND}, operated by ${SELLER}.` },
       { property: "og:title", content: `Terms of Service — ${BRAND}` },
       { property: "og:description", content: `Terms governing your use of ${BRAND}.` },
+      { property: "og:url", content: "https://qrcodegenerator.life/terms" },
     ],
+    links: [{ rel: "canonical", href: "https://qrcodegenerator.life/terms" }],
   }),
 });
 

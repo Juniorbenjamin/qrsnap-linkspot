@@ -16,7 +16,7 @@ export const Route = createFileRoute("/pricing")({
       {
         name: "description",
         content:
-          "Simple, transparent pricing. Free forever plan with unlimited QR scans. Upgrade to Pro for unlimited links, custom branded QR codes with logo, and real-time analytics.",
+          "Simple, transparent pricing. Free forever with unlimited scans. Upgrade to Pro for unlimited links, branded QR codes, and real-time analytics.",
       },
       {
         name: "keywords",

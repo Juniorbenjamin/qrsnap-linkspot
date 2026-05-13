@@ -3,7 +3,7 @@ import { UseCaseLanding, faqJsonLd } from "@/components/UseCaseLanding";
 
 const SITE = "https://qrcodegenerator.life";
 const URL = `${SITE}/qr-code-for-restaurant`;
-const TITLE = "QR Code for Restaurant Menu — Free Generator with Logo | QRLinkSpot";
+const TITLE = "Restaurant QR Menu Generator — Free with Logo | QRLinkSpot";
 const DESC = "Create a free QR code menu for your restaurant in 90 seconds. Add your logo, update the menu anytime without reprinting, and track scans. No app, no signup.";
 
 const faqs = [
