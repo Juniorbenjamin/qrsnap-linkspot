@@ -114,7 +114,7 @@ export const Route = createFileRoute("/blog/$slug")({
     const url = `${SITE}/blog/${loaderData.slug}`;
     return {
       meta: [
-        { title: `${loaderData.title} | QRLinkSpot Blog` },
+        { title: loaderData.title },
         { name: "description", content: loaderData.description },
         { property: "og:title", content: loaderData.title },
         { property: "og:description", content: loaderData.description },

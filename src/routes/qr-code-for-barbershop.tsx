@@ -3,7 +3,7 @@ import { UseCaseLanding, faqJsonLd } from "@/components/UseCaseLanding";
 
 const SITE = "https://qrcodegenerator.life";
 const URL = `${SITE}/qr-code-for-barbershop`;
-const TITLE = "Barbershop QR Code — Bookings, Tips & Reviews in One Scan | QRLinkSpot";
+const TITLE = "Barbershop QR Code — Bookings & Tips in One Scan | QRLinkSpot";
 const DESC = "Free barbershop QR code for mirrors, business cards, and Instagram. One scan opens booking, tip link, Instagram, and reviews. Loved by barbers worldwide.";
 
 const faqs = [

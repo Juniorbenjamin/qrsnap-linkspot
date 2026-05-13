@@ -14,7 +14,9 @@ export const Route = createFileRoute("/privacy")({
       { name: "description", content: `How ${BRAND} (operated by ${SELLER}) collects, uses, and protects your personal data.` },
       { property: "og:title", content: `Privacy Notice — ${BRAND}` },
       { property: "og:description", content: `How ${BRAND} collects, uses, and protects your personal data.` },
+      { property: "og:url", content: "https://qrcodegenerator.life/privacy" },
     ],
+    links: [{ rel: "canonical", href: "https://qrcodegenerator.life/privacy" }],
   }),
 });
 

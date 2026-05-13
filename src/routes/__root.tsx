@@ -28,8 +28,8 @@ function NotFoundComponent() {
 
 const SITE_URL = "https://qrcodegenerator.life";
 const OG_IMAGE = "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6926bcd1-8732-41ae-8bf5-0c9ce840b610/id-preview-898c6460--c0acd155-84e1-495c-be73-91e23f2f9733.lovable.app-1777661840589.png";
-const SITE_TITLE = "QRLinkSpot — Free QR Code Generator & Link-in-Bio for Small Business";
-const SITE_DESC = "Free QR code generator and link-in-bio page for small businesses, barbers, restaurants, creators & freelancers. Create a custom branded QR with logo in 90 seconds — no signup, no credit card. Track scans and update links anytime.";
+const SITE_TITLE = "QRLinkSpot — Free QR Code & Link-in-Bio Generator";
+const SITE_DESC = "Free branded QR codes and a link-in-bio page for creators and small businesses. Made in 90 seconds — no signup, no credit card.";
 const SITE_KEYWORDS = "qr code generator, free qr code, qr code with logo, custom qr code, link in bio, linktree alternative, qr code for business, qr code for restaurant, qr code for barber, dynamic qr code, branded qr code, qr code maker, qrcodegenerator, qr generator online, qr code for instagram, vcard qr code, menu qr code, scan qr, qr analytics";
 
 export const Route = createRootRoute({
@@ -53,7 +53,6 @@ export const Route = createRootRoute({
       { property: "og:title", content: SITE_TITLE },
       { property: "og:description", content: SITE_DESC },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: SITE_URL },
       { property: "og:locale", content: "en_US" },
       { property: "og:image", content: OG_IMAGE },
       { property: "og:image:width", content: "1200" },
@@ -68,7 +67,6 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "canonical", href: SITE_URL },
     ],
     scripts: [
       {
