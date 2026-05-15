@@ -34,9 +34,10 @@ export function SiteHeader() {
         <nav className="hidden items-center gap-8 md:flex">
           {navItem("/", "Home")}
           {navItem("/qr-code", "Free QR")}
+          {navItem("/qr-studio", "QR Studio")}
           {navItem("/pricing", "Pricing")}
           {navItem("/blog", "Blog")}
-          {user && navItem("/dashboard", "Dashboard")}
+          {user && navItem("/dashboard", "LinkSpot")}
           {user && navItem("/analytics", "Analytics")}
         </nav>
 

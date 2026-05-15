@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
+import { Route as QrStudioRouteImport } from './routes/qr-studio'
 import { Route as QrCodeForWifiRouteImport } from './routes/qr-code-for-wifi'
 import { Route as QrCodeForSmallBusinessRouteImport } from './routes/qr-code-for-small-business'
 import { Route as QrCodeForRestaurantRouteImport } from './routes/qr-code-for-restaurant'
@@ -49,6 +50,11 @@ const SignupRoute = SignupRouteImport.update({
 const RefundPolicyRoute = RefundPolicyRouteImport.update({
   id: '/refund-policy',
   path: '/refund-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QrStudioRoute = QrStudioRouteImport.update({
+  id: '/qr-studio',
+  path: '/qr-studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const QrCodeForWifiRoute = QrCodeForWifiRouteImport.update({
@@ -187,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/qr-code-for-restaurant': typeof QrCodeForRestaurantRoute
   '/qr-code-for-small-business': typeof QrCodeForSmallBusinessRoute
   '/qr-code-for-wifi': typeof QrCodeForWifiRoute
+  '/qr-studio': typeof QrStudioRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
@@ -215,6 +222,7 @@ export interface FileRoutesByTo {
   '/qr-code-for-restaurant': typeof QrCodeForRestaurantRoute
   '/qr-code-for-small-business': typeof QrCodeForSmallBusinessRoute
   '/qr-code-for-wifi': typeof QrCodeForWifiRoute
+  '/qr-studio': typeof QrStudioRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
@@ -244,6 +252,7 @@ export interface FileRoutesById {
   '/qr-code-for-restaurant': typeof QrCodeForRestaurantRoute
   '/qr-code-for-small-business': typeof QrCodeForSmallBusinessRoute
   '/qr-code-for-wifi': typeof QrCodeForWifiRoute
+  '/qr-studio': typeof QrStudioRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/signup': typeof SignupRoute
   '/terms': typeof TermsRoute
@@ -274,6 +283,7 @@ export interface FileRouteTypes {
     | '/qr-code-for-restaurant'
     | '/qr-code-for-small-business'
     | '/qr-code-for-wifi'
+    | '/qr-studio'
     | '/refund-policy'
     | '/signup'
     | '/terms'
@@ -302,6 +312,7 @@ export interface FileRouteTypes {
     | '/qr-code-for-restaurant'
     | '/qr-code-for-small-business'
     | '/qr-code-for-wifi'
+    | '/qr-studio'
     | '/refund-policy'
     | '/signup'
     | '/terms'
@@ -330,6 +341,7 @@ export interface FileRouteTypes {
     | '/qr-code-for-restaurant'
     | '/qr-code-for-small-business'
     | '/qr-code-for-wifi'
+    | '/qr-studio'
     | '/refund-policy'
     | '/signup'
     | '/terms'
@@ -359,6 +371,7 @@ export interface RootRouteChildren {
   QrCodeForRestaurantRoute: typeof QrCodeForRestaurantRoute
   QrCodeForSmallBusinessRoute: typeof QrCodeForSmallBusinessRoute
   QrCodeForWifiRoute: typeof QrCodeForWifiRoute
+  QrStudioRoute: typeof QrStudioRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   SignupRoute: typeof SignupRoute
   TermsRoute: typeof TermsRoute
@@ -389,6 +402,13 @@ declare module '@tanstack/react-router' {
       path: '/refund-policy'
       fullPath: '/refund-policy'
       preLoaderRoute: typeof RefundPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qr-studio': {
+      id: '/qr-studio'
+      path: '/qr-studio'
+      fullPath: '/qr-studio'
+      preLoaderRoute: typeof QrStudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/qr-code-for-wifi': {
@@ -584,6 +604,7 @@ const rootRouteChildren: RootRouteChildren = {
   QrCodeForRestaurantRoute: QrCodeForRestaurantRoute,
   QrCodeForSmallBusinessRoute: QrCodeForSmallBusinessRoute,
   QrCodeForWifiRoute: QrCodeForWifiRoute,
+  QrStudioRoute: QrStudioRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   SignupRoute: SignupRoute,
   TermsRoute: TermsRoute,
