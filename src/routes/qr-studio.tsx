@@ -1,12 +1,15 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { QRPreview } from "@/components/QRPreview";
-import { Plus, Trash2, QrCode, Sparkles, Pencil } from "lucide-react";
+import { Plus, Trash2, QrCode, Sparkles, Pencil, Crown, Lock } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth, useMyProfile } from "@/lib/store";
+
+const FREE_QR_LIMIT = 2;
 
 export const Route = createFileRoute("/qr-studio")({
   component: QRStudio,
@@ -69,8 +72,15 @@ function newQR(): CustomQR {
 }
 
 function QRStudio() {
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const { profile, loading: profileLoading } = useMyProfile();
   const [items, setItems] = useState<CustomQR[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && !user) navigate({ to: "/login" });
+  }, [authLoading, user, navigate]);
 
   useEffect(() => {
     const all = loadAll();
@@ -78,7 +88,9 @@ function QRStudio() {
     if (all.length) setActiveId(all[0].id);
   }, []);
 
+  const isPro = !!profile?.is_pro;
   const active = items.find((q) => q.id === activeId) ?? null;
+  const atLimit = !isPro && items.length >= FREE_QR_LIMIT;
 
   const persist = (next: CustomQR[]) => {
     setItems(next);
@@ -86,6 +98,10 @@ function QRStudio() {
   };
 
   const addNew = () => {
+    if (atLimit) {
+      toast.error(`Free plan is limited to ${FREE_QR_LIMIT} QR codes. Upgrade to Pro for unlimited.`);
+      return;
+    }
     const q = newQR();
     persist([q, ...items]);
     setActiveId(q.id);
@@ -105,6 +121,10 @@ function QRStudio() {
 
   const onLogoUpload = (file: File) => {
     if (!active) return;
+    if (!isPro) {
+      toast.error("Logo upload is a Pro feature");
+      return;
+    }
     if (file.size > 1024 * 1024) {
       toast.error("Logo must be under 1MB");
       return;
@@ -114,6 +134,15 @@ function QRStudio() {
     reader.readAsDataURL(file);
   };
 
+  if (authLoading || profileLoading || !profile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SiteHeader />
+        <div className="mx-auto max-w-6xl px-4 py-16 text-center text-muted-foreground sm:px-6">Loading…</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
@@ -122,16 +151,38 @@ function QRStudio() {
           <div>
             <div className="inline-flex h-6 items-center gap-1.5 rounded-full bg-primary/10 px-2.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
               <Sparkles className="h-3 w-3" /> QR Studio
+              {isPro && (
+                <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300">
+                  <Crown className="h-2.5 w-2.5" /> Pro
+                </span>
+              )}
             </div>
             <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Personal QR codes</h1>
             <p className="mt-1 text-sm text-muted-foreground sm:text-base">
-              Create unlimited QR codes for any link — websites, menus, WiFi, contact cards. Customize and download.
+              {isPro
+                ? "Unlimited QR codes with full customization — colors, presets, center text, and logo upload."
+                : `Free plan: up to ${FREE_QR_LIMIT} QR codes with basic colors. Upgrade to Pro for unlimited + logo, presets & center text.`}
             </p>
           </div>
-          <Button onClick={addNew} variant="brand" size="lg">
-            <Plus className="mr-1.5 h-4 w-4" /> New QR code
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            {!isPro && (
+              <Button asChild variant="outline" size="lg">
+                <Link to="/pricing"><Crown className="mr-1.5 h-4 w-4" /> Upgrade</Link>
+              </Button>
+            )}
+            <Button onClick={addNew} variant="brand" size="lg" disabled={atLimit}>
+              <Plus className="mr-1.5 h-4 w-4" /> New QR code
+            </Button>
+          </div>
         </div>
+
+        {!isPro && (
+          <div className="mb-6 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm">
+            <span className="font-medium">{items.length} / {FREE_QR_LIMIT}</span>
+            <span className="text-muted-foreground"> QR codes used on the free plan. </span>
+            <Link to="/pricing" className="font-medium text-primary hover:underline">Upgrade to Pro →</Link>
+          </div>
+        )}
 
         {items.length === 0 ? (
           <EmptyState onCreate={addNew} />
@@ -217,61 +268,63 @@ function QRStudio() {
                       />
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <ColorField label="Code color" value={active.fgColor} onChange={(v) => update({ fgColor: v })} />
-                      <ColorField label="Background" value={active.bgColor} onChange={(v) => update({ bgColor: v })} />
-                    </div>
-
-                    <div>
-                      <Label className="mb-2 block">Color preset</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {PRESETS.map((p) => (
-                          <button
-                            key={p.name}
-                            type="button"
-                            onClick={() => update({ fgColor: p.fg, bgColor: p.bg })}
-                            className="flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs transition hover:border-primary/40"
-                          >
-                            <span className="flex h-4 w-4 overflow-hidden rounded-full border border-border">
-                              <span style={{ background: p.fg }} className="h-full w-1/2" />
-                              <span style={{ background: p.bg }} className="h-full w-1/2" />
-                            </span>
-                            {p.name}
-                          </button>
-                        ))}
+                    <ProGate isPro={isPro} feature="Custom colors, presets, center text & logo upload">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <ColorField label="Code color" value={active.fgColor} onChange={(v) => update({ fgColor: v })} />
+                        <ColorField label="Background" value={active.bgColor} onChange={(v) => update({ bgColor: v })} />
                       </div>
-                    </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="logoText">Center text (optional)</Label>
-                      <Input
-                        id="logoText"
-                        value={active.logoText}
-                        onChange={(e) => update({ logoText: e.target.value })}
-                        placeholder="e.g. WIFI"
-                        maxLength={4}
-                      />
-                    </div>
+                      <div>
+                        <Label className="mb-2 block">Color preset</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {PRESETS.map((p) => (
+                            <button
+                              key={p.name}
+                              type="button"
+                              onClick={() => update({ fgColor: p.fg, bgColor: p.bg })}
+                              className="flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs transition hover:border-primary/40"
+                            >
+                              <span className="flex h-4 w-4 overflow-hidden rounded-full border border-border">
+                                <span style={{ background: p.fg }} className="h-full w-1/2" />
+                                <span style={{ background: p.bg }} className="h-full w-1/2" />
+                              </span>
+                              {p.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="logoUpload">Center logo image (optional)</Label>
-                      <div className="flex items-center gap-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="logoText">Center text (optional)</Label>
                         <Input
-                          id="logoUpload"
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const f = e.target.files?.[0];
-                            if (f) onLogoUpload(f);
-                          }}
+                          id="logoText"
+                          value={active.logoText}
+                          onChange={(e) => update({ logoText: e.target.value })}
+                          placeholder="e.g. WIFI"
+                          maxLength={4}
                         />
-                        {active.logoUrl && (
-                          <Button variant="ghost" size="sm" onClick={() => update({ logoUrl: "" })}>
-                            Remove
-                          </Button>
-                        )}
                       </div>
-                    </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="logoUpload">Center logo image (optional)</Label>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            id="logoUpload"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) onLogoUpload(f);
+                            }}
+                          />
+                          {active.logoUrl && (
+                            <Button variant="ghost" size="sm" onClick={() => update({ logoUrl: "" })}>
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </ProGate>
 
                     <div className="space-y-2">
                       <Label htmlFor="size">Size ({active.size}px)</Label>
@@ -336,3 +389,25 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
     </div>
   );
 }
+
+function ProGate({ isPro, feature, children }: { isPro: boolean; feature: string; children: React.ReactNode }) {
+  if (isPro) return <div className="space-y-4">{children}</div>;
+  return (
+    <div className="relative">
+      <div aria-hidden className="pointer-events-none space-y-4 opacity-40 blur-[1.5px]">
+        {children}
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-background/40 p-4 backdrop-blur-sm">
+        <div className="max-w-sm rounded-xl border border-primary/30 bg-background p-4 text-center shadow-soft">
+          <Lock className="mx-auto mb-2 h-5 w-5 text-primary" />
+          <p className="text-sm font-medium">{feature}</p>
+          <p className="mt-1 text-xs text-muted-foreground">Unlock with Pro for unlimited QRs and full customization.</p>
+          <Button asChild variant="brand" size="sm" className="mt-3">
+            <Link to="/pricing"><Crown className="mr-1.5 h-4 w-4" /> Upgrade to Pro</Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
