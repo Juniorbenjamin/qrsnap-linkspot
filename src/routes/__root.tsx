@@ -44,6 +44,7 @@ export const Route = createRootRoute({
       { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1" },
       { name: "googlebot", content: "index, follow" },
       { name: "msvalidate.01", content: "89DBE98A945ECCB35BA26CEA4998F254" },
+      { name: "google-site-verification", content: "z8vNrb60E3ng77luq0kaPpZSsrWZ_2pT7T_zLhMcGsQ" },
       
       { name: "theme-color", content: "#6366f1" },
       { name: "application-name", content: "QRLinkSpot" },
