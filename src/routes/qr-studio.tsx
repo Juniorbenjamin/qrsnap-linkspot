@@ -268,61 +268,63 @@ function QRStudio() {
                       />
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <ColorField label="Code color" value={active.fgColor} onChange={(v) => update({ fgColor: v })} />
-                      <ColorField label="Background" value={active.bgColor} onChange={(v) => update({ bgColor: v })} />
-                    </div>
-
-                    <div>
-                      <Label className="mb-2 block">Color preset</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {PRESETS.map((p) => (
-                          <button
-                            key={p.name}
-                            type="button"
-                            onClick={() => update({ fgColor: p.fg, bgColor: p.bg })}
-                            className="flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs transition hover:border-primary/40"
-                          >
-                            <span className="flex h-4 w-4 overflow-hidden rounded-full border border-border">
-                              <span style={{ background: p.fg }} className="h-full w-1/2" />
-                              <span style={{ background: p.bg }} className="h-full w-1/2" />
-                            </span>
-                            {p.name}
-                          </button>
-                        ))}
+                    <ProGate isPro={isPro} feature="Custom colors, presets, center text & logo upload">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <ColorField label="Code color" value={active.fgColor} onChange={(v) => update({ fgColor: v })} />
+                        <ColorField label="Background" value={active.bgColor} onChange={(v) => update({ bgColor: v })} />
                       </div>
-                    </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="logoText">Center text (optional)</Label>
-                      <Input
-                        id="logoText"
-                        value={active.logoText}
-                        onChange={(e) => update({ logoText: e.target.value })}
-                        placeholder="e.g. WIFI"
-                        maxLength={4}
-                      />
-                    </div>
+                      <div>
+                        <Label className="mb-2 block">Color preset</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {PRESETS.map((p) => (
+                            <button
+                              key={p.name}
+                              type="button"
+                              onClick={() => update({ fgColor: p.fg, bgColor: p.bg })}
+                              className="flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs transition hover:border-primary/40"
+                            >
+                              <span className="flex h-4 w-4 overflow-hidden rounded-full border border-border">
+                                <span style={{ background: p.fg }} className="h-full w-1/2" />
+                                <span style={{ background: p.bg }} className="h-full w-1/2" />
+                              </span>
+                              {p.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="logoUpload">Center logo image (optional)</Label>
-                      <div className="flex items-center gap-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="logoText">Center text (optional)</Label>
                         <Input
-                          id="logoUpload"
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const f = e.target.files?.[0];
-                            if (f) onLogoUpload(f);
-                          }}
+                          id="logoText"
+                          value={active.logoText}
+                          onChange={(e) => update({ logoText: e.target.value })}
+                          placeholder="e.g. WIFI"
+                          maxLength={4}
                         />
-                        {active.logoUrl && (
-                          <Button variant="ghost" size="sm" onClick={() => update({ logoUrl: "" })}>
-                            Remove
-                          </Button>
-                        )}
                       </div>
-                    </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="logoUpload">Center logo image (optional)</Label>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            id="logoUpload"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) onLogoUpload(f);
+                            }}
+                          />
+                          {active.logoUrl && (
+                            <Button variant="ghost" size="sm" onClick={() => update({ logoUrl: "" })}>
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </ProGate>
 
                     <div className="space-y-2">
                       <Label htmlFor="size">Size ({active.size}px)</Label>
