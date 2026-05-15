@@ -72,8 +72,15 @@ function newQR(): CustomQR {
 }
 
 function QRStudio() {
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const { profile, loading: profileLoading } = useMyProfile();
   const [items, setItems] = useState<CustomQR[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && !user) navigate({ to: "/login" });
+  }, [authLoading, user, navigate]);
 
   useEffect(() => {
     const all = loadAll();
@@ -81,7 +88,9 @@ function QRStudio() {
     if (all.length) setActiveId(all[0].id);
   }, []);
 
+  const isPro = !!profile?.is_pro;
   const active = items.find((q) => q.id === activeId) ?? null;
+  const atLimit = !isPro && items.length >= FREE_QR_LIMIT;
 
   const persist = (next: CustomQR[]) => {
     setItems(next);
@@ -89,6 +98,10 @@ function QRStudio() {
   };
 
   const addNew = () => {
+    if (atLimit) {
+      toast.error(`Free plan is limited to ${FREE_QR_LIMIT} QR codes. Upgrade to Pro for unlimited.`);
+      return;
+    }
     const q = newQR();
     persist([q, ...items]);
     setActiveId(q.id);
