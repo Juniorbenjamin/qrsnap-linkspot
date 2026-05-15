@@ -73,9 +73,10 @@ export function SiteHeader() {
           <div className="flex flex-col gap-4 px-4 py-4">
             {navItem("/", "Home")}
             {navItem("/qr-code", "Free QR")}
+            {navItem("/qr-studio", "QR Studio")}
             {navItem("/pricing", "Pricing")}
             {navItem("/blog", "Blog")}
-            {user && navItem("/dashboard", "Dashboard")}
+            {user && navItem("/dashboard", "LinkSpot")}
             {user && navItem("/analytics", "Analytics")}
             <div className="flex gap-2 pt-2">
               {user ? (
