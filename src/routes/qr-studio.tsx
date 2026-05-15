@@ -121,6 +121,10 @@ function QRStudio() {
 
   const onLogoUpload = (file: File) => {
     if (!active) return;
+    if (!isPro) {
+      toast.error("Logo upload is a Pro feature");
+      return;
+    }
     if (file.size > 1024 * 1024) {
       toast.error("Logo must be under 1MB");
       return;
@@ -130,6 +134,15 @@ function QRStudio() {
     reader.readAsDataURL(file);
   };
 
+  if (authLoading || profileLoading || !profile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SiteHeader />
+        <div className="mx-auto max-w-6xl px-4 py-16 text-center text-muted-foreground sm:px-6">Loading…</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
@@ -138,16 +151,38 @@ function QRStudio() {
           <div>
             <div className="inline-flex h-6 items-center gap-1.5 rounded-full bg-primary/10 px-2.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
               <Sparkles className="h-3 w-3" /> QR Studio
+              {isPro && (
+                <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 text-[10px] font-semibold text-amber-700 dark:text-amber-300">
+                  <Crown className="h-2.5 w-2.5" /> Pro
+                </span>
+              )}
             </div>
             <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Personal QR codes</h1>
             <p className="mt-1 text-sm text-muted-foreground sm:text-base">
-              Create unlimited QR codes for any link — websites, menus, WiFi, contact cards. Customize and download.
+              {isPro
+                ? "Unlimited QR codes with full customization — colors, presets, center text, and logo upload."
+                : `Free plan: up to ${FREE_QR_LIMIT} QR codes with basic colors. Upgrade to Pro for unlimited + logo, presets & center text.`}
             </p>
           </div>
-          <Button onClick={addNew} variant="brand" size="lg">
-            <Plus className="mr-1.5 h-4 w-4" /> New QR code
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            {!isPro && (
+              <Button asChild variant="outline" size="lg">
+                <Link to="/pricing"><Crown className="mr-1.5 h-4 w-4" /> Upgrade</Link>
+              </Button>
+            )}
+            <Button onClick={addNew} variant="brand" size="lg" disabled={atLimit}>
+              <Plus className="mr-1.5 h-4 w-4" /> New QR code
+            </Button>
+          </div>
         </div>
+
+        {!isPro && (
+          <div className="mb-6 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm">
+            <span className="font-medium">{items.length} / {FREE_QR_LIMIT}</span>
+            <span className="text-muted-foreground"> QR codes used on the free plan. </span>
+            <Link to="/pricing" className="font-medium text-primary hover:underline">Upgrade to Pro →</Link>
+          </div>
+        )}
 
         {items.length === 0 ? (
           <EmptyState onCreate={addNew} />
