@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { QRPreview } from "@/components/QRPreview";
+
 import { useAuth, useMyProfile, useMyLinks, useMyAnalytics, FREE_LINK_LIMIT, themes, type Theme, type ButtonStyle, type FontWeight, type FontFamily, type LinkItem, type SocialLinks } from "@/lib/store";
 import { useSubscription } from "@/hooks/useSubscription";
 import { createCustomerPortalSession } from "@/server/payments.functions";
@@ -266,23 +266,14 @@ function Dashboard() {
               </div>
             </Section>
 
-            <Section title="Your QR code" description="Print on cards, signs, or flyers — it always points to your LinkSpot.">
-              <div className="grid gap-6 sm:grid-cols-[200px_1fr] sm:items-center">
-                <div className="mx-auto w-full max-w-[200px]">
-                  <QRPreview
-                    value={`${publicUrl}?src=qr`}
-                    fgColor={profile.is_pro ? profile.qr_color : "#1a1a2e"}
-                    bgColor={profile.is_pro ? profile.qr_bg : "#ffffff"}
-                    logoText={profile.is_pro ? profile.logo_text : ""}
-                    logoUrl={profile.is_pro ? profile.logo_url : ""}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <p className="break-all text-sm text-muted-foreground">{publicUrl}</p>
-                  <Button asChild variant="outline" size="sm">
-                    <Link to="/qr">Customize QR</Link>
-                  </Button>
-                </div>
+            <Section title="QR codes" description="QR Studio is now its own space — create unlimited custom QR codes for any link.">
+              <div className="flex flex-wrap items-center gap-2">
+                <Button asChild variant="brand" size="sm">
+                  <Link to="/qr-studio"><QrCode className="mr-1.5 h-4 w-4" /> Open QR Studio</Link>
+                </Button>
+                <Button asChild variant="outline" size="sm">
+                  <Link to="/qr">QR for this LinkSpot</Link>
+                </Button>
               </div>
             </Section>
           </TabsContent>
