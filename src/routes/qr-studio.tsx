@@ -389,3 +389,25 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
     </div>
   );
 }
+
+function ProGate({ isPro, feature, children }: { isPro: boolean; feature: string; children: React.ReactNode }) {
+  if (isPro) return <div className="space-y-4">{children}</div>;
+  return (
+    <div className="relative">
+      <div aria-hidden className="pointer-events-none space-y-4 opacity-40 blur-[1.5px]">
+        {children}
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-background/40 p-4 backdrop-blur-sm">
+        <div className="max-w-sm rounded-xl border border-primary/30 bg-background p-4 text-center shadow-soft">
+          <Lock className="mx-auto mb-2 h-5 w-5 text-primary" />
+          <p className="text-sm font-medium">{feature}</p>
+          <p className="mt-1 text-xs text-muted-foreground">Unlock with Pro for unlimited QRs and full customization.</p>
+          <Button asChild variant="brand" size="sm" className="mt-3">
+            <Link to="/pricing"><Crown className="mr-1.5 h-4 w-4" /> Upgrade to Pro</Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
