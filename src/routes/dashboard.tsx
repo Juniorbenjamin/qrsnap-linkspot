@@ -102,12 +102,36 @@ function Dashboard() {
     catch (e) { toast.error("Could not remove link"); }
   };
 
+  const [copied, setCopied] = useState(false);
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(publicUrl);
+      setCopied(true);
       toast.success("Link copied");
+      setTimeout(() => setCopied(false), 1800);
     } catch { toast.error("Could not copy"); }
   };
+
+  const nativeShare = async () => {
+    const shareData = {
+      title: `${profile.display_name || profile.username} on LinkSpot`,
+      text: `Check out my LinkSpot — all my links in one place.`,
+      url: publicUrl,
+    };
+    if (typeof navigator !== "undefined" && (navigator as any).share) {
+      try { await (navigator as any).share(shareData); } catch { /* user cancelled */ }
+    } else {
+      copyLink();
+    }
+  };
+
+  const shareText = encodeURIComponent(`Check out my LinkSpot: ${publicUrl}`);
+  const shareUrl = encodeURIComponent(publicUrl);
+  const socialShares = [
+    { label: "WhatsApp", href: `https://wa.me/?text=${shareText}`, Icon: MessageCircle, color: "hover:text-[#25D366]" },
+    { label: "X", href: `https://twitter.com/intent/tweet?text=${shareText}`, Icon: X, color: "hover:text-foreground" },
+    { label: "Email", href: `mailto:?subject=${encodeURIComponent("My LinkSpot")}&body=${shareText}`, Icon: Mail, color: "hover:text-primary" },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
