@@ -12,7 +12,7 @@ import { useAuth, useMyProfile, useMyLinks, useMyAnalytics, FREE_LINK_LIMIT, the
 import { useSubscription } from "@/hooks/useSubscription";
 import { createCustomerPortalSession } from "@/server/payments.functions";
 import { getPaddleEnvironment } from "@/lib/paddle";
-import { publicProfileUrl, shortProfileLabel } from "@/lib/public-url";
+import { publicProfileUrl, shortProfileLabel, SHORT_DOMAIN_PREFIX } from "@/lib/public-url";
 import { Plus, ExternalLink, Trash2, Eye, MousePointerClick, Crown, Pencil, QrCode, CreditCard, Loader2, Upload, X, GripVertical, Pin, Star, CheckCircle2, Copy, Link2, Palette, User, BarChart3, Settings as SettingsIcon, Share2, Mail, MessageCircle, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { QRPreview } from "@/components/QRPreview";
