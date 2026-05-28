@@ -102,7 +102,6 @@ function Dashboard() {
     catch (e) { toast.error("Could not remove link"); }
   };
 
-  const [copied, setCopied] = useState(false);
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(publicUrl);
