@@ -168,7 +168,7 @@ function Dashboard() {
               <span className="min-w-0 flex-1">
                 <span className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Shareable link</span>
                 <span className="block truncate font-mono text-sm sm:text-base">
-                  <span className="text-muted-foreground">linkspot.site/</span>
+                  <span className="text-muted-foreground">{SHORT_DOMAIN_PREFIX}</span>
                   <span className="font-semibold text-foreground">{profile.username}</span>
                 </span>
               </span>
