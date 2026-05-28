@@ -41,6 +41,7 @@ function Dashboard() {
   const { subscription, isActive, cancelAtPeriodEnd, isPastDue } = useSubscription();
   const [portalLoading, setPortalLoading] = useState(false);
   const [tab, setTab] = useState<string>(search.tab ?? "links");
+  const [copied, setCopied] = useState(false);
 
   const clicksByLink = useMemo(() => {
     const map: Record<string, number> = {};
