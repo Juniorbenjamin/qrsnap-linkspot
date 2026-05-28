@@ -12,7 +12,7 @@ import { useAuth, useMyProfile, useMyLinks, useMyAnalytics, FREE_LINK_LIMIT, the
 import { useSubscription } from "@/hooks/useSubscription";
 import { createCustomerPortalSession } from "@/server/payments.functions";
 import { getPaddleEnvironment } from "@/lib/paddle";
-import { publicProfileUrl, shortProfileLabel } from "@/lib/public-url";
+import { publicProfileUrl, shortProfileLabel, SHORT_DOMAIN_PREFIX } from "@/lib/public-url";
 import { Plus, ExternalLink, Trash2, Eye, MousePointerClick, Crown, Pencil, QrCode, CreditCard, Loader2, Upload, X, GripVertical, Pin, Star, CheckCircle2, Copy, Link2, Palette, User, BarChart3, Settings as SettingsIcon, Share2, Mail, MessageCircle, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { QRPreview } from "@/components/QRPreview";
@@ -168,7 +168,7 @@ function Dashboard() {
               <span className="min-w-0 flex-1">
                 <span className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Shareable link</span>
                 <span className="block truncate font-mono text-sm sm:text-base">
-                  <span className="text-muted-foreground">linkspot.site/</span>
+                  <span className="text-muted-foreground">{SHORT_DOMAIN_PREFIX}</span>
                   <span className="font-semibold text-foreground">{profile.username}</span>
                 </span>
               </span>
