@@ -137,51 +137,103 @@ function Dashboard() {
     <div className="min-h-screen bg-background">
       <SiteHeader />
       <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
-        {/* Header card */}
+        {/* Shareable LinkSpot card */}
         <div className="mb-6 overflow-hidden rounded-3xl border border-border bg-gradient-card p-5 shadow-soft sm:p-6">
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="inline-flex h-6 items-center rounded-full bg-primary/10 px-2.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
-                  Your LinkSpot
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-6 items-center rounded-full bg-primary/10 px-2.5 text-[10px] font-semibold uppercase tracking-wider text-primary">
+                Your LinkSpot
+              </span>
+              {profile.is_pro && (
+                <span className="inline-flex h-6 items-center gap-1 rounded-full bg-amber-100 px-2.5 text-[10px] font-semibold uppercase tracking-wider text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">
+                  <Crown className="h-3 w-3" /> Pro
                 </span>
-                {profile.is_pro && (
-                  <span className="inline-flex h-6 items-center gap-1 rounded-full bg-amber-100 px-2.5 text-[10px] font-semibold uppercase tracking-wider text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">
-                    <Crown className="h-3 w-3" /> Pro
-                  </span>
-                )}
-              </div>
+              )}
+            </div>
+            <Button asChild variant="brand" size="sm">
+              <Link to="/links/$id" params={{ id: "new" }}><Plus className="mr-1.5 h-4 w-4" /> Add link</Link>
+            </Button>
+          </div>
 
-              <button
-                onClick={copyLink}
-                className="group mt-3 flex w-full items-center gap-2 rounded-2xl border border-border/60 bg-background/60 px-3.5 py-2.5 text-left backdrop-blur transition hover:border-primary/40 hover:bg-background sm:w-auto"
-                aria-label="Copy your LinkSpot URL"
-              >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 text-[11px] font-bold text-primary-foreground">
-                  L
-                </span>
-                <span className="min-w-0 flex-1 truncate font-mono text-sm sm:text-base">
+          {/* URL pill + primary actions */}
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-stretch">
+            <button
+              onClick={copyLink}
+              className="group relative flex min-w-0 flex-1 items-center gap-3 overflow-hidden rounded-2xl border border-border/60 bg-background/70 px-4 py-3 text-left backdrop-blur transition hover:border-primary/50 hover:bg-background hover:shadow-soft"
+              aria-label="Copy your LinkSpot URL"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 text-sm font-bold text-primary-foreground shadow-glow">
+                L
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Shareable link</span>
+                <span className="block truncate font-mono text-sm sm:text-base">
                   <span className="text-muted-foreground">linkspot.site/</span>
                   <span className="font-semibold text-foreground">{profile.username}</span>
                 </span>
-                <Copy className="h-4 w-4 shrink-0 text-muted-foreground transition group-hover:text-primary" />
-              </button>
+              </span>
+              <span className={`flex h-9 shrink-0 items-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition ${copied ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "border-border/60 bg-background text-muted-foreground group-hover:border-primary/40 group-hover:text-primary"}`}>
+                {copied ? (<><Check className="h-3.5 w-3.5" /> Copied</>) : (<><Copy className="h-3.5 w-3.5" /> Copy</>)}
+              </span>
+            </button>
 
-              <p className="mt-2 text-xs text-muted-foreground">{profile.display_name}</p>
-            </div>
-
-            <div className="flex flex-wrap gap-2 sm:flex-nowrap">
-              <Button asChild variant="outline" size="sm">
-                <a href={`/u/${profile.username}`} target="_blank" rel="noreferrer">
-                  <ExternalLink className="mr-1.5 h-4 w-4" /> View
-                </a>
+            <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-nowrap">
+              <Button onClick={nativeShare} variant="outline" size="sm" className="h-auto flex-col gap-1 py-2 sm:h-9 sm:flex-row sm:py-0">
+                <Share2 className="h-4 w-4" />
+                <span className="text-xs">Share</span>
               </Button>
-              <Button asChild variant="brand" size="sm">
-                <Link to="/links/$id" params={{ id: "new" }}><Plus className="mr-1.5 h-4 w-4" /> Add link</Link>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-auto flex-col gap-1 py-2 sm:h-9 sm:flex-row sm:py-0">
+                    <QrCode className="h-4 w-4" />
+                    <span className="text-xs">QR</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-sm">
+                  <DialogHeader>
+                    <DialogTitle>Your LinkSpot QR</DialogTitle>
+                    <DialogDescription className="truncate font-mono text-xs">{shortLabel}</DialogDescription>
+                  </DialogHeader>
+                  <div className="flex flex-col items-center gap-3 py-2">
+                    <QRPreview value={publicUrl} size={240} />
+                    <Button asChild variant="link" size="sm">
+                      <Link to="/qr-studio">Customize in QR Studio →</Link>
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              <Button asChild variant="outline" size="sm" className="h-auto flex-col gap-1 py-2 sm:h-9 sm:flex-row sm:py-0">
+                <a href={`/u/${profile.username}`} target="_blank" rel="noreferrer">
+                  <ExternalLink className="h-4 w-4" />
+                  <span className="text-xs">View</span>
+                </a>
               </Button>
             </div>
           </div>
+
+          {/* Social share row */}
+          <div className="mt-4 flex items-center gap-2 border-t border-border/50 pt-3">
+            <span className="text-xs text-muted-foreground">Share to</span>
+            <div className="flex items-center gap-1">
+              {socialShares.map(({ label, href, Icon, color }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`Share to ${label}`}
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg border border-border/60 bg-background/60 text-muted-foreground transition hover:border-primary/40 hover:bg-background ${color}`}
+                >
+                  <Icon className="h-4 w-4" />
+                </a>
+              ))}
+            </div>
+            <span className="ml-auto truncate text-xs text-muted-foreground">{profile.display_name}</span>
+          </div>
         </div>
+
 
         {isPastDue && (
           <div className="mb-4 rounded-2xl border border-orange-300 bg-orange-50 p-4 text-sm text-orange-900">
